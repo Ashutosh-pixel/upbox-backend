@@ -1,8 +1,15 @@
 const express = require('express');
 const fileUploadRoute = express.Router();
-const Endpoints = require('../utils/endpoints/endpoint')
-const {uploadFileController, upload} =  require('../controllers/uploadFileController')
+const {uploadFileController, upload} =  require('../controllers/uploadFileController');
+const readFilesController = require('../controllers/readFilesController');
+const readImagesController = require('../controllers/readImagesController');
+const readVideosController = require('../controllers/readVideosController');
+const readDocumentsController = require('../controllers/readDocumentsController');
 
 fileUploadRoute.post('/uploadfile', upload.single('file'), uploadFileController);
+fileUploadRoute.get('/files/:userID', readFilesController);
+fileUploadRoute.get('/files/images/:userID', readImagesController);
+fileUploadRoute.get('/files/videos/:userID', readVideosController);
+fileUploadRoute.get('/files/documents/:userID', readDocumentsController);
 
 module.exports = fileUploadRoute;
