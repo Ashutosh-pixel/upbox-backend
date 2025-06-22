@@ -23,7 +23,7 @@ const uploadFileController = async (req, res) => {
 
         const params = {
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: `uploads/${uuidv4()}-${file.originalname}`,
+            Key: `user-${userID}/uploads/${uuidv4()}-${file.originalname}`,
             Body: file.buffer,
             ContentType: file.mimetype
         }
