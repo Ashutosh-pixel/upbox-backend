@@ -25,13 +25,19 @@ const uploadFileController = async (req, res) => {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: `user-${userID}/uploads/${uuidv4()}-${file.originalname}`,
             Body: file.buffer,
-            ContentType: file.mimetype
+            ContentType: file.mimetype,
+            Metadata: {
+                'x-amz-meta-filename': file.originalname,
+                'x-amz-meta-userid': userID,
+                'x-amz-meta-filesize': file.size.toString(),
+                'x-amz-meta-filetype': file.mimetype
+            }
         }
 
         const command = new PutObjectCommand(params);
 
         await s3.send(command);
-        await File.create({userID: userID, filename: file.originalname, size: file.size, type: file.mimetype, storagePath: params.Key })
+        await File.create({ userID: userID, filename: file.originalname, size: file.size, type: file.mimetype, storagePath: params.Key })
         res.status(200).json({ message: 'File uploaded successfully!' });
     } catch (error) {
         console.error(error);
@@ -39,4 +45,4 @@ const uploadFileController = async (req, res) => {
     }
 };
 
-module.exports = {uploadFileController, upload: multer()}
+module.exports = { uploadFileController, upload: multer() }
