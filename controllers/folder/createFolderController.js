@@ -1,4 +1,4 @@
-const {S3Client, PutObjectCommand} = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const Folder = require("../../models/Folder");
 
 require('dotenv').config();
@@ -13,12 +13,14 @@ const s3 = new S3Client({
 
 const createFolderController = async (req, res) => {
     try {
-        const {name, parentID, userID, folderPath} = req.body;
-        console.log('folder', name, parentID, userID, folderPath);
+        const { name, parentID, userID, folderPath, pathIds, pathNames } = req.body;
+        console.log('folder', name, parentID, userID, folderPath, pathIds, pathNames);
+
+        const folderHierarchy = pathNames.join('/');
 
         const params = {
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: `user-${userID}/uploads/${folderPath}`,
+            Key: !folderHierarchy ? `user-${userID}/uploads/${folderPath}/` : `user-${userID}/uploads/${folderHierarchy}/${folderPath}/`,
             Body: ''
         }
 
@@ -29,14 +31,16 @@ const createFolderController = async (req, res) => {
             name,
             parentID,
             userID,
-            storagePath: params.Key
+            storagePath: params.Key,
+            pathIds,
+            pathNames
         }
         const newFolder = new Folder(newData)
         await newFolder.save()
-        res.status(200).json({message: 'Folder created successfully!'});
+        res.status(200).json({ message: 'Folder created successfully!' });
     } catch (e) {
         console.log('error is', e)
-        req.status(500).json({message: 'Folder creation failed'});
+        res.status(500).json({ message: 'Folder creation failed' });
     }
 }
 

@@ -13,4 +13,4 @@ function getContentType(fileExtension) {
     return extensionMap[fileExtension.toLowerCase()];
 }
 
-module.exports = {getContentType}
+module.exports = { getContentType }

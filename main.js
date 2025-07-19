@@ -1,9 +1,9 @@
 const express = require('express');
 const connectDB = require('./utils/database/dbConnect');
-const fileUploadRoute = require('./routes/uploadFileRoute')
+const fileRoute = require('./routes/FileRoute')
 const Endpoints = require('./utils/endpoints/endpoint');
 const cors = require('cors');
-const folderCreateRoute = require("./routes/createFolderRoute");
+const folderRoute = require("./routes/FolderRoute");
 
 require('dotenv').config();
 
@@ -29,8 +29,8 @@ connectDB()
     process.exit(1)
   })
 
-app.use('/user', fileUploadRoute);
-app.use('/folder', folderCreateRoute);
+app.use('/user', fileRoute);
+app.use('/folder', folderRoute);
 app.get('/', (req, res) => {
   res.status(200).json("Hello User")
 })
