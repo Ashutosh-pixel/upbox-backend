@@ -23,12 +23,25 @@ const FileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    parentID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Folder',
+        default: null,
+    },
+    pathIds: {
+        type: [mongoose.Schema.Types.ObjectId],
+        required: true
+    },
+    pathNames: {
+        type: [String],
+        required: true
+    },
     uploadTime: {
         type: Date,
         required: true,
         default: Date.now
     },
-}, {timestamps: true})
+}, { timestamps: true })
 
 const File = mongoose.model('File', FileSchema);
 

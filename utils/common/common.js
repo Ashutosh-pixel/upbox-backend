@@ -6,7 +6,8 @@ const extensionMap = {
     webp: 'image/webp',
     svg: 'image/svg+xml',
     bmp: 'image/bmp',
-    tiff: 'image/tiff'
+    tiff: 'image/tiff',
+    avif: 'image/avif'
 };
 
 function getContentType(fileExtension) {

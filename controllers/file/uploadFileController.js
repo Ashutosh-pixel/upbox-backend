@@ -1,6 +1,6 @@
-const {S3Client, PutObjectCommand} = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
-const {v4: uuidv4} = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 const File = require('../../models/Files');
 
 
@@ -17,13 +17,15 @@ const s3 = new S3Client({
 const uploadFileController = async (req, res) => {
     try {
         const file = req.file;
-        const userID = req.body.userID;
+        const { userID, pathIds, pathNames, parentID } = req.body;
 
-        console.log('file', file, userID)
+        console.log('file', file, userID, parentID);
+
+        folderHierarchy = pathNames.join('/');
 
         const params = {
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: `user-${userID}/uploads/${uuidv4()}-${file.originalname}`,
+            Key: !parentID ? `user-${userID}/uploads/${uuidv4()}-${file.originalname}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${file.originalname}`,
             Body: file.buffer,
             ContentType: file.mimetype,
             Metadata: {
@@ -42,13 +44,16 @@ const uploadFileController = async (req, res) => {
             filename: file.originalname,
             size: file.size,
             type: file.mimetype,
-            storagePath: params.Key
+            storagePath: params.Key,
+            parentID,
+            pathIds,
+            pathNames
         })
-        res.status(200).json({message: 'File uploaded successfully!'});
+        res.status(200).json({ message: 'File uploaded successfully!' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({error: 'File upload failed'});
+        res.status(500).json({ error: 'File upload failed' });
     }
 };
 
-module.exports = {uploadFileController, upload: multer()}
+module.exports = { uploadFileController, upload: multer() }
