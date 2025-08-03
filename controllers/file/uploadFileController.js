@@ -19,13 +19,24 @@ const uploadFileController = async (req, res) => {
         const file = req.file;
         const { userID, pathIds, pathNames, parentID } = req.body;
 
-        console.log('file', file, userID, parentID);
+        // atomic create + insert in file schema to avoid race condition
+        const folderHierarchy = pathNames.join('/');
+        const filename = file.originalname;
+        const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}-${file.originalname}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${file.originalname}`
 
-        folderHierarchy = pathNames.join('/');
+        const output = await File.updateOne(
+            { userID, parentID, filename },
+            { $setOnInsert: { userID, filename, size: file.size, type: file.mimetype, storagePath, parentID, pathIds, pathNames } },
+            { upsert: true }
+        )
+
+        if (output.upsertedCount === 0) {
+            return res.status(409).json({ message: "File already exists", output: output });
+        }
 
         const params = {
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: !parentID ? `user-${userID}/uploads/${uuidv4()}-${file.originalname}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${file.originalname}`,
+            Key: storagePath,
             Body: file.buffer,
             ContentType: file.mimetype,
             Metadata: {
@@ -39,16 +50,6 @@ const uploadFileController = async (req, res) => {
         const command = new PutObjectCommand(params);
 
         await s3.send(command);
-        await File.create({
-            userID: userID,
-            filename: file.originalname,
-            size: file.size,
-            type: file.mimetype,
-            storagePath: params.Key,
-            parentID,
-            pathIds,
-            pathNames
-        })
         res.status(200).json({ message: 'File uploaded successfully!' });
     } catch (error) {
         console.error(error);

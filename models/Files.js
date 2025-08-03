@@ -43,6 +43,7 @@ const FileSchema = new mongoose.Schema({
     },
 }, { timestamps: true })
 
+FileSchema.index({ userID: 1, parentID: 1, filename: 1 }, { unique: true })
 const File = mongoose.model('File', FileSchema);
 
 module.exports = File;

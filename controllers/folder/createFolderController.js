@@ -14,9 +14,19 @@ const s3 = new S3Client({
 const createFolderController = async (req, res) => {
     try {
         const { name, parentID, userID, folderPath, pathIds, pathNames } = req.body;
-        console.log('folder', name, parentID, userID, folderPath, pathIds, pathNames);
 
         const folderHierarchy = pathNames.join('/');
+        const storagePath = !folderHierarchy ? `user-${userID}/uploads/${folderPath}/` : `user-${userID}/uploads/${folderHierarchy}/${folderPath}/`
+
+        const output = await Folder.updateOne(
+            { userID, parentID, name },
+            { $setOnInsert: { userID, parentID, name, storagePath, pathIds, pathNames } },
+            { upsert: true }
+        )
+
+        if (output.upsertedCount === 0) {
+            return res.status(409).json({ message: "Folder already exists", output: output });
+        }
 
         const params = {
             Bucket: process.env.S3_BUCKET_NAME,
@@ -27,16 +37,7 @@ const createFolderController = async (req, res) => {
         const command = new PutObjectCommand(params);
         await s3.send(command);
         console.log(`Folder '${params.Key}' created successfully in bucket '${params.Bucket}'.`);
-        const newData = {
-            name,
-            parentID,
-            userID,
-            storagePath: params.Key,
-            pathIds,
-            pathNames
-        }
-        const newFolder = new Folder(newData)
-        await newFolder.save()
+
         res.status(200).json({ message: 'Folder created successfully!' });
     } catch (e) {
         console.log('error is', e)
