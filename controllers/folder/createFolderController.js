@@ -28,6 +28,7 @@ const createFolderController = async (req, res) => {
             return res.status(409).json({ message: "Folder already exists", output: output });
         }
 
+        /* upload empty folder
         const params = {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: !folderHierarchy ? `user-${userID}/uploads/${folderPath}/` : `user-${userID}/uploads/${folderHierarchy}/${folderPath}/`,
@@ -37,6 +38,7 @@ const createFolderController = async (req, res) => {
         const command = new PutObjectCommand(params);
         await s3.send(command);
         console.log(`Folder '${params.Key}' created successfully in bucket '${params.Bucket}'.`);
+        */
 
         res.status(200).json({ message: 'Folder created successfully!' });
     } catch (e) {

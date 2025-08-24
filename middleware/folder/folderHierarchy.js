@@ -2,7 +2,7 @@ const computeFolderHierarchy = require('../../utils/common/computeFolderHierarch
 
 const folderHierarchy = async (req, res, next) => {
     try {
-        const { parentID } = req.body;
+        const parentID = JSON.parse(req.body.parentID);
         const pathIds = [];
         const pathNames = [];
         await computeFolderHierarchy(parentID, pathIds, pathNames);
