@@ -1,7 +1,6 @@
 const express = require('express');
 const connectDB = require('./utils/database/dbConnect');
 const fileRoute = require('./routes/FileRoute')
-const Endpoints = require('./utils/endpoints/endpoint');
 const cors = require('cors');
 const folderRoute = require("./routes/FolderRoute");
 
