@@ -24,9 +24,10 @@ const uploadBulkFilesController = async (req,res) => {
             let folderDoc = folderMap.get(selectedFiles[i].parent);
             // console.log("folderDoc", folderDoc);
             let storagePath = `${folderDoc.storagePath}${uuidv4()}-${selectedFiles[i].name}`;
+            let pathIds = [...folderDoc.pathIds, folderDoc._id]
             const output = await File.updateOne(
                 {userID, parentID: folderDoc._id, filename: selectedFiles[i].name},
-                {$setOnInsert: {userID, filename: selectedFiles[i].name, size: selectedFiles[i].size, type: selectedFiles[i].type, storagePath, pathIds: folderDoc.pathIds, pathNames: folderDoc.pathNames}},
+                {$setOnInsert: {userID, filename: selectedFiles[i].name, size: selectedFiles[i].size, type: selectedFiles[i].type, storagePath, pathIds: pathIds, pathNames: folderDoc.pathNames}},
                 {upsert: true}
             )
 

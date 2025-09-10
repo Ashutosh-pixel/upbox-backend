@@ -4,6 +4,7 @@ async function computeFolderHierarchy(parentID, pathIdsArray, pathNamesArray) {
     if (!parentID) {
         pathIdsArray.push(null);
         pathNamesArray.reverse();
+        pathIdsArray.reverse();
         return;
     }
 
