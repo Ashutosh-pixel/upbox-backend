@@ -8,6 +8,9 @@ const readDocumentsController = require('../controllers/file/readDocumentsContro
 const readImageS3Controller = require('../controllers/file/readImageS3Controller');
 const folderHierarchy = require('../middleware/folder/folderHierarchy');
 const pasteFileController = require("../controllers/file/pasteFileController");
+const fileUploadInitiateController = require('../controllers/file/fileUploadInitiateController');
+const getPresignedURLController = require('../controllers/file/getPre-signedURLController');
+const fileChunksAssemblyController = require('../controllers/file/fileChunksAssemblyController');
 
 fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController);
 fileRoute.post('/pastefile', folderHierarchy, pasteFileController);
@@ -16,5 +19,8 @@ fileRoute.get('/files/images', readImagesController);
 fileRoute.get('/files/videos/:userID', readVideosController);
 fileRoute.get('/files/documents/:userID', readDocumentsController);
 fileRoute.get('/file/image', readImageS3Controller);
+fileRoute.post('/file/upload/initiate', fileUploadInitiateController);
+fileRoute.get('/file/upload/url', getPresignedURLController);
+fileRoute.post('/file/upload/complete', fileChunksAssemblyController);
 
 module.exports = fileRoute;

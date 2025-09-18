@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-s3": "^3.816.0",
+    "@aws-sdk/s3-request-presigner": "^3.891.0",
     "aws-sdk": "^2.1692.0",
     "busboy": "^0.3.1",
     "cors": "^2.8.5",
