@@ -1,4 +1,5 @@
 const { CompleteMultipartUploadCommand, S3Client } = require("@aws-sdk/client-s3");
+const UploadSession = require("../../models/UploadSession");
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -10,9 +11,7 @@ const s3 = new S3Client({
 
 
 const fileChunksAssemblyController = async (req, res) => {
-    const { fileName, uploadId, parts } = req.body;
-
-    console.log('fileName, uploadId, parts', fileName, uploadId, parts);
+    const { fileName, uploadId, parts, userID } = req.body;
 
     try {
         const command = new CompleteMultipartUploadCommand({
@@ -23,7 +22,14 @@ const fileChunksAssemblyController = async (req, res) => {
         });
 
         const response = await s3.send(command);
-        res.status(200).json({ location: response.Location, message: "file assembly successful" });
+
+        if(response.Location){
+            await UploadSession.findOneAndUpdate({ userID, fileName, sessionID: uploadId }, { status: "Completed"})
+
+            return res.status(200).json({ location: response.Location, message: "file assembly successful" });
+        }
+
+        res.status(404).json({ message: "file assembly failed" });
 
     } catch (error) {
         console.log('error in file assembly', error);
