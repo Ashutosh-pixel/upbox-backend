@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const uploadPartSchema = new mongoose.Schema({
-    partNumber: Number,
+    PartNumber: Number,
     ETag: String
 }, {_id: false});
 
