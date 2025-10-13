@@ -14,19 +14,18 @@ const s3 = new S3Client({
     },
 });
 
-const uploadFileController = async (req, res) => {
+const uploadFileController = async (req, res, next) => {
     try {
-        const file = req.file;
-        const { userID, pathIds, pathNames, parentID } = req.body;
+        const { userID, pathIds, pathNames, parentID, fileName, fileSize, mimetype} = req.body;
 
         // atomic create + insert in file schema to avoid race condition
         const folderHierarchy = pathNames.join('/');
-        const filename = file.originalname;
-        const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}-${file.originalname}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${file.originalname}`
+        const filename = fileName;
+        const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}-${filename}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${filename}`
 
         const output = await File.updateOne(
             { userID, parentID, filename },
-            { $setOnInsert: { userID, filename, size: file.size, type: file.mimetype, storagePath, parentID, pathIds, pathNames } },
+            { $setOnInsert: { userID, filename, size: fileSize, type: mimetype, storagePath, parentID, pathIds, pathNames } },
             { upsert: true }
         )
 
@@ -34,23 +33,10 @@ const uploadFileController = async (req, res) => {
             return res.status(409).json({ message: "File already exists", output: output });
         }
 
-        const params = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: storagePath,
-            Body: file.buffer,
-            ContentType: file.mimetype,
-            Metadata: {
-                'x-amz-meta-filename': file.originalname,
-                'x-amz-meta-userid': userID,
-                'x-amz-meta-filesize': file.size.toString(),
-                'x-amz-meta-filetype': file.mimetype
-            }
-        }
 
-        const command = new PutObjectCommand(params);
-
-        await s3.send(command);
-        res.status(200).json({ message: 'File uploaded successfully!' });
+        req.body.storagePath = storagePath;
+        req.body.fileID = output.upsertedId;
+        next();
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'File upload failed' });

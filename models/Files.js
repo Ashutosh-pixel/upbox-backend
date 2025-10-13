@@ -41,6 +41,11 @@ const FileSchema = new mongoose.Schema({
         required: true,
         default: Date.now
     },
+    status: {
+        type: String,
+        default: "Progress",
+        enum: ['Progress', 'Completed', 'Aborted']
+    }
 }, { timestamps: true })
 
 FileSchema.index({ userID: 1, parentID: 1, filename: 1 }, { unique: true })

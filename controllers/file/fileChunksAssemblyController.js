@@ -1,5 +1,6 @@
 const { CompleteMultipartUploadCommand, S3Client } = require("@aws-sdk/client-s3");
 const UploadSession = require("../../models/UploadSession");
+const File = require("../../models/Files");
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -11,12 +12,12 @@ const s3 = new S3Client({
 
 
 const fileChunksAssemblyController = async (req, res) => {
-    const { fileName, uploadId, parts, userID } = req.body;
+    const { fileName, uploadId, parts, userID, storagePath, parentID } = req.body;
 
     try {
         const command = new CompleteMultipartUploadCommand({
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: fileName,
+            Key: storagePath,
             UploadId: uploadId,
             MultipartUpload: { Parts: parts },
         });
@@ -25,6 +26,7 @@ const fileChunksAssemblyController = async (req, res) => {
 
         if(response.Location){
             await UploadSession.findOneAndUpdate({ userID, fileName, sessionID: uploadId }, { status: "Completed"})
+            const output = await File.findOneAndUpdate({ userID, filename: fileName, parentID }, { status: "Completed" })
 
             return res.status(200).json({ location: response.Location, message: "file assembly successful" });
         }

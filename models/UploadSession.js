@@ -11,6 +11,11 @@ const UploadSessionSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    fileID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'File',
+        required: true
+    },
     userID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

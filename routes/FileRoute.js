@@ -14,14 +14,14 @@ const fileChunksAssemblyController = require('../controllers/file/fileChunksAsse
 const sessionUploadPartsController = require('../controllers/file/sessionUploadPartsController');
 const fileResumeInitiateController = require('../controllers/file/fileResumeInitiateController');
 
-fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController);
+fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
 fileRoute.post('/pastefile', folderHierarchy, pasteFileController);
 // fileRoute.get('/files/:userID', readFilesController);
 fileRoute.get('/files/images', readImagesController);
 fileRoute.get('/files/videos/:userID', readVideosController);
 fileRoute.get('/files/documents/:userID', readDocumentsController);
 fileRoute.get('/file/image', readImageS3Controller);
-fileRoute.post('/file/upload/initiate', fileUploadInitiateController);
+// fileRoute.post('/file/upload/initiate', fileUploadInitiateController);
 fileRoute.get('/file/upload/url', getPresignedURLController);
 fileRoute.post('/file/upload/complete', fileChunksAssemblyController);
 fileRoute.post('/file/uploadsession/uploadparts', sessionUploadPartsController);

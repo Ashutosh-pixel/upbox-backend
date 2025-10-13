@@ -11,11 +11,11 @@ const s3 = new S3Client({
 
 const getPresignedURLController = async (req, res) => {
     try {
-        const { fileName, uploadId, partNumber } = req.query;
+        const { fileName, uploadId, partNumber, storagePath } = req.query;
 
         const command = new UploadPartCommand({
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: fileName,
+            Key: storagePath,
             UploadId: uploadId,
             PartNumber: Number(partNumber)
         });

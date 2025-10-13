@@ -1,3 +1,4 @@
+const File = require("../../models/Files");
 const UploadSession = require("../../models/UploadSession");
 
 const fileResumeInitiateController = async (req, res) => {
@@ -14,7 +15,9 @@ const fileResumeInitiateController = async (req, res) => {
             return res.status(400).json({ error: "resume session not found" });
         }
 
-        res.status(200).json({ output: output });
+        const fileDoc = await File.findOne({_id: output.fileID});
+
+        res.status(200).json({ output: output, storagePath: fileDoc.storagePath });
 
     } catch (error) {
         console.log('error in resume initiate', error);
