@@ -14,7 +14,7 @@ const folderRoute = express.Router();
 
 folderRoute.post('/createfolder', folderHierarchy, createFolderController);
 folderRoute.get('/getallfolder', getFolderController);
-folderRoute.post('/uploadfolder', upload.array("files"), folderHierarchy, searchAndCreateFolder, uploadBulkFilesController)
+folderRoute.post('/uploadfolder', folderHierarchy, searchAndCreateFolder)
 folderRoute.post('/pastefolder', upload.array('files'), folderHierarchy, pasteFolderController, pasteFilesController);
 
 module.exports = folderRoute;

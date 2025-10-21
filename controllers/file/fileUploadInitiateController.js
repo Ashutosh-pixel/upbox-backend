@@ -18,9 +18,9 @@ const fileUploadInitiateController = async (req, res) => {
         const command = new CreateMultipartUploadCommand({ Bucket: process.env.S3_BUCKET_NAME, Key: storagePath });
 
         const response = await s3.send(command);
-        
+
         if(response.UploadId){
-            await UploadSession.create({
+            const output = await UploadSession.create({
                 sessionID: response.UploadId,
                 userID: userID,
                 fileID: fileID,
@@ -30,7 +30,7 @@ const fileUploadInitiateController = async (req, res) => {
                 totalParts: totalParts
             })
 
-            return res.status(200).json({ message: "UploadInitiated", uploadId: response.UploadId, storagePath: storagePath });
+            return res.status(200).json({ message: "UploadInitiated", uploadId: response.UploadId, storagePath: storagePath, fileID: output.fileID });
         }
 
         res.status(500).json({ message: "AWS S3 sessionId failed", uploadId: response.UploadId });

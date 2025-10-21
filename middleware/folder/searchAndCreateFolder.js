@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 
 const searchAndCreateFolder = async (req,res,next) => {
     const { userID, pathIds, pathNames } = req.body;
-    const selectedFolders = JSON.parse(req.body.folders);
-    const parentID = JSON.parse(req.body.parentID)
+    const selectedFolders = req.body.folders;
+    const parentID = req.body.parentID;
 
     try{
         const folderHierarchy = pathNames.join('/');
@@ -27,7 +27,7 @@ const searchAndCreateFolder = async (req,res,next) => {
                     name: selectedFolders[0].name,
                     storagePath: storagePath,
                     pathIds: pathIds,
-                    pathNames: selectedFolders[0].parent ? [parentFolderDoc.name, selectedFolders[0].name] : selectedFolders[0].name
+                    pathNames: selectedFolders[0].parent ? [...parentFolderDoc.pathNames, selectedFolders[0].name] : selectedFolders[0].name
                 })
                 folderMap.set(selectedFolders[0].path, folderDoc);
             }
@@ -54,9 +54,7 @@ const searchAndCreateFolder = async (req,res,next) => {
             }
         }
         console.log('map', folderMap);
-        req.body.folderMap = folderMap;
-        next();
-        // res.status(200).json({ message: "folder upload successfully!" });
+        res.status(200).json({ folderMap: Object.fromEntries(folderMap) });
     }
     catch (e){
         console.log('error', e);

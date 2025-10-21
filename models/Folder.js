@@ -30,6 +30,11 @@ const FolderSchema = new mongoose.Schema({
     uploadTime: {
         type: Date,
         default: Date.now
+    },
+    status: {
+      type: String,
+      enum: ['Progress', 'Completed', 'Aborted'],
+      default: 'Progress'
     }
 }, { timestamps: true })
 

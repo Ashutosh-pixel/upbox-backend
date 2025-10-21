@@ -13,6 +13,7 @@ const getPresignedURLController = require('../controllers/file/getPre-signedURLC
 const fileChunksAssemblyController = require('../controllers/file/fileChunksAssemblyController');
 const sessionUploadPartsController = require('../controllers/file/sessionUploadPartsController');
 const fileResumeInitiateController = require('../controllers/file/fileResumeInitiateController');
+const multipartUploadFileController = require('../controllers/file/multipartUploadFileController');
 
 fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
 fileRoute.post('/pastefile', folderHierarchy, pasteFileController);
@@ -26,5 +27,6 @@ fileRoute.get('/file/upload/url', getPresignedURLController);
 fileRoute.post('/file/upload/complete', fileChunksAssemblyController);
 fileRoute.post('/file/uploadsession/uploadparts', sessionUploadPartsController);
 fileRoute.post('/file/resume/initiate', fileResumeInitiateController);
+fileRoute.post('/uploadfile/initiate', multipartUploadFileController, fileUploadInitiateController);
 
 module.exports = fileRoute;
