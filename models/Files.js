@@ -23,6 +23,10 @@ const FileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    sourcePath: {
+        type: String,
+        required: true
+    },
     parentID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Folder',

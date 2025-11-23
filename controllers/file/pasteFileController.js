@@ -1,6 +1,8 @@
 const {S3Client, PutObjectCommand, CopyObjectCommand} = require("@aws-sdk/client-s3");
 const {v4: uuidv4} = require("uuid");
 const File = require("../../models/Files");
+const {fileBroadcast} = require("../../utils/sse/sseManager");
+const Folder = require("../../models/Folder");
 
 require('dotenv').config();
 
@@ -22,23 +24,26 @@ const pasteFileController = async (req, res) => {
 
         const output = await File.updateOne(
             { userID, parentID, filename },
-            { $setOnInsert: { userID, filename, size: size, type: type, storagePath, parentID, pathIds, pathNames } },
+            { $setOnInsert: { userID, filename, size: size, type: type, storagePath, sourcePath: originalStoragePath, parentID, pathIds, pathNames, status: 'Completed'} },
             { upsert: true }
         )
 
         if (output.upsertedCount === 0) {
             return res.status(409).json({ message: "File already exists", output: output });
         }
+        // const params = {
+        //     Bucket: process.env.S3_BUCKET_NAME,
+        //     Key: storagePath,
+        //     CopySource: `${process.env.S3_BUCKET_NAME}/${originalStoragePath}`
+        // }
+        //
+        // const command = new CopyObjectCommand(params);
 
-        const params = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: storagePath,
-            CopySource: `${process.env.S3_BUCKET_NAME}/${originalStoragePath}`
-        }
+        // await s3.send(command);
 
-        const command = new CopyObjectCommand(params);
+        const fileDoc = await File.findOne({_id: output.upsertedId});
 
-        await s3.send(command);
+        fileBroadcast("fileUploaded", userID, [fileDoc]);
         res.status(200).json({ message: 'File copy successfully!' });
 
     }

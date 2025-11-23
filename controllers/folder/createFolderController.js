@@ -1,5 +1,6 @@
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const Folder = require("../../models/Folder");
+const {fileBroadcast} = require("../../utils/sse/sseManager");
 
 require('dotenv').config();
 
@@ -28,17 +29,9 @@ const createFolderController = async (req, res) => {
             return res.status(409).json({ message: "Folder already exists", output: output });
         }
 
-        /* upload empty folder
-        const params = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: !folderHierarchy ? `user-${userID}/uploads/${folderPath}/` : `user-${userID}/uploads/${folderHierarchy}/${folderPath}/`,
-            Body: ''
-        }
+        const folderDoc = await Folder.findOne({_id: output.upsertedId});
 
-        const command = new PutObjectCommand(params);
-        await s3.send(command);
-        console.log(`Folder '${params.Key}' created successfully in bucket '${params.Bucket}'.`);
-        */
+        fileBroadcast('folderUploaded', userID, [folderDoc]);
 
         res.status(200).json({ message: 'Folder created successfully!' });
     } catch (e) {

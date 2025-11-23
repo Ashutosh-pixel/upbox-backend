@@ -1,5 +1,6 @@
 const Folder = require("../../models/Folder");
 const mongoose = require("mongoose");
+const { fileBroadcast } = require("../../utils/sse/sseManager");
 
 const searchAndCreateFolder = async (req,res,next) => {
     const { userID, pathIds, pathNames } = req.body;
@@ -29,7 +30,9 @@ const searchAndCreateFolder = async (req,res,next) => {
                     pathIds: pathIds,
                     pathNames: selectedFolders[0].parent ? [...parentFolderDoc.pathNames, selectedFolders[0].name] : selectedFolders[0].name
                 })
+                folderDoc['userID'] = userID;
                 folderMap.set(selectedFolders[0].path, folderDoc);
+                fileBroadcast('folderUploaded', userID, [folderDoc]);
             }
 
             // console.log(pathIds, pathNames)
@@ -50,10 +53,12 @@ const searchAndCreateFolder = async (req,res,next) => {
                     pathIds: [...folderMap.get(selectedFolders[i].parent).pathIds, folderMap.get(selectedFolders[i].parent)._id],
                     pathNames: [...folderMap.get(selectedFolders[i].parent).pathNames, selectedFolders[i].name]
                 })
+                folderDoc['userID'] = userID;
                 folderMap.set(selectedFolders[i].path, folderDoc);
+                fileBroadcast('folderUploaded', userID, [folderDoc]);
             }
         }
-        console.log('map', folderMap);
+        // console.log('map', folderMap);
         res.status(200).json({ folderMap: Object.fromEntries(folderMap) });
     }
     catch (e){

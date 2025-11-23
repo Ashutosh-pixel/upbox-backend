@@ -15,7 +15,7 @@ const s3 = new S3Client({
 const fileChunksAssemblyController = async (req, res) => {
     const { uploadId, parts, storagePath, folderID, fileID } = req.body;
 
-    console.log("uploadId, parts, storagePath, folderID, fileID", uploadId, parts, storagePath, fileID)
+    // console.log("uploadId, parts, storagePath, folderID, fileID", uploadId, parts, storagePath, fileID)
 
     try {
         const command = new CompleteMultipartUploadCommand({

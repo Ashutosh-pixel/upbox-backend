@@ -11,14 +11,27 @@ const s3 = new S3Client({
 
 const fileUploadInitiateController = async (req, res) => {
     try {
-        const { fileName, userID, fileSize, chunkSize, totalParts, storagePath, fileID } = req.body;
+        const { fileName, userID, fileSize, chunkSize, totalParts, storagePath, fileID, fileType, parentID } = req.body;
 
-        console.log('body', req.body);
+        // console.log('body', req.body);
 
-        const command = new CreateMultipartUploadCommand({ Bucket: process.env.S3_BUCKET_NAME, Key: storagePath });
+        const command = new CreateMultipartUploadCommand(
+          { 
+            Bucket: process.env.S3_BUCKET_NAME, 
+            Key: storagePath,
+            Metadata: {
+                'x-amz-meta-filename': String(fileName),
+                'x-amz-meta-userid': String(userID),
+                'x-amz-meta-filesize': String(fileSize),
+                'x-amz-meta-filetype': String(fileType),
+                'x-amz-meta-id': String(fileID),
+                'x-amz-meta-parentid': String(parentID),
+            },
+            ContentType: fileType
+          }
+        );
 
         const response = await s3.send(command);
-
         if(response.UploadId){
             const output = await UploadSession.create({
                 sessionID: response.UploadId,

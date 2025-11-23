@@ -13,7 +13,7 @@ const getPresignedURLController = async (req, res) => {
     try {
         const { fileName, uploadId, partNumber, storagePath } = req.query;
 
-        console.log('file get url key ', fileName, uploadId, partNumber, storagePath)
+        // console.log('file get url key ', fileName, uploadId, partNumber, storagePath)
 
         const command = new UploadPartCommand({
             Bucket: process.env.S3_BUCKET_NAME,

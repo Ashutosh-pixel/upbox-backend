@@ -16,7 +16,7 @@ const s3 = new S3Client({
 
 const uploadFileController = async (req, res, next) => {
     try {
-        const { userID, pathIds, pathNames, parentID, fileName, fileSize, mimetype} = req.body;
+        const { userID, pathIds, pathNames, parentID, fileName, fileSize, fileType} = req.body;
 
         // atomic create + insert in file schema to avoid race condition
         const folderHierarchy = pathNames.join('/');
@@ -25,7 +25,7 @@ const uploadFileController = async (req, res, next) => {
 
         const output = await File.updateOne(
             { userID, parentID, filename },
-            { $setOnInsert: { userID, filename, size: fileSize, type: mimetype, storagePath, parentID, pathIds, pathNames } },
+            { $setOnInsert: { userID, filename, size: fileSize, type: fileType, storagePath, parentID, pathIds, pathNames } },
             { upsert: true }
         )
 

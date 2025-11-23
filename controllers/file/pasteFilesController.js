@@ -1,6 +1,8 @@
 const {S3Client} = require("@aws-sdk/client-s3");
 const File = require("../../models/Files");
 const mongoose = require("mongoose");
+const {v4: uuidv4} = require("uuid");
+const {fileBroadcast} = require("../../utils/sse/sseManager");
 const { ObjectId } = mongoose.Types;
 require('dotenv').config();
 
@@ -16,11 +18,14 @@ const pasteFilesController = async (req, res) => {
     const { userID, id, idMap, newFolders } = req.body;
     try {
         const files = await File.find({userID, pathIds: {$in: [id]}}).lean();
-        const newFiles = [];
+        console.log('files', files);
+        let newFiles = [];
         for (const file of files) {
             const newfolderid = idMap.get(file?.parentID.toString());
             for (const folder of newFolders) {
                 if(newfolderid === folder._id){
+                    const folderHierarchy = folder.pathNames.join('/');
+                    const storagePath = `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${(await file).filename}`
                     const newFile = {
                         _id: new ObjectId(),
                         userID: userID,
@@ -28,9 +33,11 @@ const pasteFilesController = async (req, res) => {
                         parentID: folder._id,
                         size: (await file).size,
                         type: (await file).type,
-                        storagePath: (await file).storagePath,
+                        storagePath: storagePath,
+                        sourcePath: (await file).storagePath,
                         pathIds: [...folder.pathIds, folder._id],
-                        pathNames: folder.pathNames
+                        pathNames: folder.pathNames,
+                        status: 'Completed'
                     }
 
                     newFiles.push(newFile);
@@ -39,7 +46,8 @@ const pasteFilesController = async (req, res) => {
         }
 
         if(newFiles){
-            await File.insertMany(newFiles);
+            newFiles = await File.insertMany(newFiles);
+            fileBroadcast("fileUploaded", userID, newFiles);
         }
 
         console.log('newFiles', newFiles);

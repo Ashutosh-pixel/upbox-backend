@@ -3,6 +3,8 @@ const connectDB = require('./utils/database/dbConnect');
 const fileRoute = require('./routes/FileRoute')
 const cors = require('cors');
 const folderRoute = require("./routes/FolderRoute");
+const { fileBroadcast } = require("./utils/sse/sseManager");
+const clients = require("./utils/sse/clients");
 
 require('dotenv').config();
 
@@ -34,48 +36,31 @@ app.get('/', (req, res) => {
   res.status(200).json("Hello User")
 })
 
-const clients = new Map();
-
-// SSE endpoint per user
-app.get('/event/:userId', (req, res) => {
-  const userID = req.params.userId;
-
-  req.socket.setTimeout(0);
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
+app.get('/connection/:userID', async (req, res) => {
+  res.setHeader('Content-Type', "text/event-stream");
+  res.setHeader('Cache-Control', "no-cache");
+  res.setHeader('Connection', "keep-alive");
   res.flushHeaders();
 
-  // Initialize client set for user
+  const userID = req.params.userID;
+
   if (!clients.has(userID)) {
-    clients.set(userID, new Set());
+    // store the SSE response object so we can write to it later
+    clients.set(userID, res);
   }
+  console.log("connected client", userID);
 
-  const userClients = clients.get(userID);
-  userClients.add(res);
-
-
-  // Clean up when client disconnects
-  req.on('close', () => {
-    userClients.delete(res);
+  req.on("close", () => {
+    // client disconnected; remove stored response object
+    console.log("disconnected client", userID);
+    clients.delete(userID);
   });
 });
 
-// Lambda notifies this route when a new file is uploaded
-app.post('/api/notify', (req, res) => {
-  const { userID, storagePath, fileUrl, type, size, filename, uploadTime, updatedAt } = req.body;
+app.post("/lambda/notify", async (req, res) => {
+  // console.log("lambda/notify", req.body);
 
-  //   const fileUrl = `https://${bucket}.s3.amazonaws.com/${key}`;
-  const data = JSON.stringify({ userID, storagePath, fileUrl, type, size, filename, uploadTime, updatedAt });
-
-  if (clients.has(userID)) {
-    for (const client of clients.get(userID)) {
-      client.write(`data: ${data}\n\n`);
-    }
-  }
-
-  // console.log('DATA', data);
-
+  fileBroadcast("fileUploaded", req.body.userID, [req.body]);
 
   res.sendStatus(200);
 });

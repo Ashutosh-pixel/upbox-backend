@@ -1,8 +1,8 @@
 const express = require('express');
 const fileRoute = express.Router();
 const { uploadFileController, upload } = require('../controllers/file/uploadFileController');
+// const readFilesController = require('../controllers/file/readFilesController');
 const readFilesController = require('../controllers/file/readFilesController');
-const readImagesController = require('../controllers/file/readImagesController');
 const readVideosController = require('../controllers/file/readVideosController');
 const readDocumentsController = require('../controllers/file/readDocumentsController');
 const readImageS3Controller = require('../controllers/file/readImageS3Controller');
@@ -10,6 +10,7 @@ const folderHierarchy = require('../middleware/folder/folderHierarchy');
 const pasteFileController = require("../controllers/file/pasteFileController");
 const fileUploadInitiateController = require('../controllers/file/fileUploadInitiateController');
 const getPresignedURLController = require('../controllers/file/getPre-signedURLController');
+const getPresignedFileURLController = require('../controllers/file/getPre-signedFileURLController');
 const fileChunksAssemblyController = require('../controllers/file/fileChunksAssemblyController');
 const sessionUploadPartsController = require('../controllers/file/sessionUploadPartsController');
 const fileResumeInitiateController = require('../controllers/file/fileResumeInitiateController');
@@ -18,7 +19,8 @@ const multipartUploadFileController = require('../controllers/file/multipartUplo
 fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
 fileRoute.post('/pastefile', folderHierarchy, pasteFileController);
 // fileRoute.get('/files/:userID', readFilesController);
-fileRoute.get('/files/images', readImagesController);
+fileRoute.get('/files', readFilesController);
+fileRoute.get('/file/:fileID', getPresignedFileURLController);
 fileRoute.get('/files/videos/:userID', readVideosController);
 fileRoute.get('/files/documents/:userID', readDocumentsController);
 fileRoute.get('/file/image', readImageS3Controller);

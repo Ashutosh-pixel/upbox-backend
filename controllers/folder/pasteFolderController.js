@@ -1,5 +1,6 @@
 const Folder = require("../../models/Folder");
 const mongoose = require("mongoose");
+const {fileBroadcast} = require("../../utils/sse/sseManager");
 const { ObjectId } = mongoose.Types;
 
 const pasteFolderController = async (req, res, next) => {
@@ -40,7 +41,7 @@ const pasteFolderController = async (req, res, next) => {
 
 
         // new Folders array of documents
-        const newFolders = folders.map((folder) => {
+        let newFolders = folders.map((folder) => {
             return {
                 _id: idMap.get(folder._id.toString()),
                 name: folder.name,
@@ -77,11 +78,13 @@ const pasteFolderController = async (req, res, next) => {
 
 
 
-        console.log('newFolders', idMap, newFolders);
 
-        await Folder.insertMany(newFolders);
+        newFolders = await Folder.insertMany(newFolders);
         req.body.idMap = idMap;
         req.body.newFolders = newFolders;
+
+        console.log('newFolders', newFolders);
+        fileBroadcast('folderUploaded', userID, newFolders)
         next();
     }
     catch (e) {
