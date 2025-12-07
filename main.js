@@ -5,6 +5,7 @@ const cors = require('cors');
 const folderRoute = require("./routes/FolderRoute");
 const { fileBroadcast } = require("./utils/sse/sseManager");
 const clients = require("./utils/sse/clients");
+const globalSearch = require('./controllers/search/globalSearch');
 
 require('dotenv').config();
 
@@ -35,6 +36,7 @@ app.use('/folder', folderRoute);
 app.get('/', (req, res) => {
   res.status(200).json("Hello User")
 })
+app.get("/search", globalSearch);
 
 app.get('/connection/:userID', async (req, res) => {
   res.setHeader('Content-Type', "text/event-stream");
