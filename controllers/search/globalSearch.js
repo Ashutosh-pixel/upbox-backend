@@ -28,6 +28,9 @@ const globalSearch = async (req, res) => {
             type: "file",
           },
         },
+        {
+          $limit: 5
+        }
       ]),
 
       await Folder.aggregate([
@@ -52,6 +55,9 @@ const globalSearch = async (req, res) => {
             type: "folder",
           },
         },
+        {
+          $limit: 5
+        }
       ]),
     ]);
 
