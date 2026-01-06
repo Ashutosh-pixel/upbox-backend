@@ -1,17 +1,9 @@
-const { CreateMultipartUploadCommand, S3Client } = require("@aws-sdk/client-s3");
-const UploadSession = require("../../models/UploadSession");
+const { CreateMultipartUploadCommand } = require("@aws-sdk/client-s3");
+const { s3 } = require("../../utils/common/common");
 
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-});
-
-const fileUploadInitiateController = async (req, res) => {
+const fileMultipartUpload = async (req, res) => {
     try {
-        const { fileName, userID, fileSize, chunkSize, totalParts, storagePath, fileID, fileType, parentID } = req.body;
+        const { fileName, userID, fileSize, storagePath, fileID, fileType, parentID } = req.body;
 
         // console.log('body', req.body);
 
@@ -32,16 +24,17 @@ const fileUploadInitiateController = async (req, res) => {
         );
 
         const response = await s3.send(command);
+
         if (response.UploadId) {
-            return res.status(200).json({ message: "UploadInitiated", uploadId: response.UploadId, storagePath: storagePath, fileID: fileID });
+            return res.status(200).json({ message: "UploadInitiated", uploadId: response.UploadId, storagePath: storagePath, fileName, parentID, fileID, userID });
         }
 
         res.status(500).json({ message: "AWS S3 sessionId failed", uploadId: response.UploadId });
 
     } catch (error) {
-        console.log('error in uploadInitiate', error);
-        res.status(500).json({ message: "UploadInitiated failed" });
+        console.log('error in filemultipart', error);
+        res.status(500).json({ message: "Uploadmultipart failed" });
     }
 }
 
-module.exports = fileUploadInitiateController;
+module.exports = fileMultipartUpload;

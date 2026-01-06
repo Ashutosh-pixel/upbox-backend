@@ -24,8 +24,7 @@ const FileSchema = new mongoose.Schema({
         required: true
     },
     sourcePath: {
-        type: String,
-        required: true
+        type: String
     },
     parentID: {
         type: mongoose.Schema.Types.ObjectId,
@@ -53,6 +52,7 @@ const FileSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 FileSchema.index({ userID: 1, parentID: 1, filename: 1 }, { unique: true })
+FileSchema.index({ userID: 1, parentID: 1, filename: 1, type: 1 }, { unique: true });
 const File = mongoose.model('File', FileSchema);
 
 module.exports = File;

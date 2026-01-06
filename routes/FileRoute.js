@@ -15,6 +15,8 @@ const fileChunksAssemblyController = require('../controllers/file/fileChunksAsse
 const sessionUploadPartsController = require('../controllers/file/sessionUploadPartsController');
 const fileResumeInitiateController = require('../controllers/file/fileResumeInitiateController');
 const multipartUploadFileController = require('../controllers/file/multipartUploadFileController');
+const renameFileController = require('../controllers/file/renameFileController');
+const fileMultipartUpload = require('../controllers/file/fileMultipartUpload');
 
 fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
 fileRoute.post('/pastefile', folderHierarchy, pasteFileController);
@@ -30,5 +32,6 @@ fileRoute.post('/file/upload/complete', fileChunksAssemblyController);
 fileRoute.post('/file/uploadsession/uploadparts', sessionUploadPartsController);
 fileRoute.post('/file/resume/initiate', fileResumeInitiateController);
 fileRoute.post('/uploadfile/initiate', multipartUploadFileController, fileUploadInitiateController);
+fileRoute.post('/file/rename', renameFileController, fileMultipartUpload);
 
 module.exports = fileRoute;

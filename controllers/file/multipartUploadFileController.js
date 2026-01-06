@@ -29,7 +29,7 @@ const multipartUploadFileController = async (req, res, next) => {
         )
 
         if (output.upsertedCount === 0) {
-            return res.status(409).json({ message: "File already exists", output: output });
+            return res.status(409).json({ message: "File already exists", output: output, errorCode: "DUPLICATE_FILE" });
         }
 
 

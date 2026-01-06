@@ -1,16 +1,18 @@
 const UploadSession = require("../../models/UploadSession");
 
-const sessionUploadPartsController = async (req,res) => {
+const sessionUploadPartsController = async (req, res) => {
     try {
-        const {uploadPartInfo, userID, fileName, uploadId} = req.body;
+        const { uploadPartInfo, userID, fileName, uploadId, fileSize, chunkSize, totalParts, fileID } = req.body;
 
         if (!uploadPartInfo || !userID || !fileName || !uploadId) {
-            return res.status(404).json({message: "payload is absent"});
+            return res.status(404).json({ message: "payload is absent" });
         }
 
-        await UploadSession.findOneAndUpdate({userID, fileName, sessionID: uploadId}, {$push: {uploadParts: uploadPartInfo}});
+        await UploadSession.findOneAndUpdate(
+            { userID, fileName, sessionID: uploadId }, { $push: { uploadParts: uploadPartInfo }, fileID, fileSize, chunkSize, totalParts }, { upsert: true }
+        );
 
-        res.status(200).json({message: "session part uploaded"});
+        res.status(200).json({ message: "session part uploaded" });
 
     } catch (error) {
         console.log('error in sessionUploadPart', error);

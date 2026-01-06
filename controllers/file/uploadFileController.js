@@ -16,7 +16,7 @@ const s3 = new S3Client({
 
 const uploadFileController = async (req, res, next) => {
     try {
-        const { userID, pathIds, pathNames, parentID, fileName, fileSize, fileType} = req.body;
+        const { userID, pathIds, pathNames, parentID, fileName, fileSize, fileType } = req.body;
 
         // atomic create + insert in file schema to avoid race condition
         const folderHierarchy = pathNames.join('/');
@@ -30,7 +30,7 @@ const uploadFileController = async (req, res, next) => {
         )
 
         if (output.upsertedCount === 0) {
-            return res.status(409).json({ message: "File already exists", output: output });
+            return res.status(409).json({ message: "File already exists", output: output, errorCode: "DUPLICATE_FILE" });
         }
 
 
