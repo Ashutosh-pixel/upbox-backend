@@ -8,7 +8,8 @@ const batchFileExistanceController = async (req, res) => {
             $or: files.map(f => ({
                 parentID: f.parentID,
                 filename: f.filename
-            }))
+            })),
+            status: 'Completed'
         })
 
         const duplicate = [];

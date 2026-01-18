@@ -13,7 +13,7 @@ const renameFileController = async (req, res, next) => {
 
         const regex = new RegExp(`^${base}( \\(\\d+\\))?${ext}$`);
 
-        const existing = await File.find({ userID, parentID, type: file.type, filename: regex });
+        const existing = await File.find({ userID, parentID, type: file.type, status: 'Completed', filename: regex });
 
         let max = 0;
 
