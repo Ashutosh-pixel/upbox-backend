@@ -1,14 +1,7 @@
 const { GetObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const File = require("../../models/Files");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-});
+const { s3 } = require("../../utils/config");
 
 const getPresignedFileURLController = async (req, res) => {
     try {

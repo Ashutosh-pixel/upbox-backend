@@ -1,16 +1,8 @@
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const Folder = require("../../models/Folder");
-const {fileBroadcast} = require("../../utils/sse/sseManager");
+const { fileBroadcast } = require("../../utils/sse/sseManager");
 
 require('dotenv').config();
-
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-});
 
 const createFolderController = async (req, res) => {
     try {
@@ -29,7 +21,7 @@ const createFolderController = async (req, res) => {
             return res.status(409).json({ message: "Folder already exists", output: output });
         }
 
-        const folderDoc = await Folder.findOne({_id: output.upsertedId});
+        const folderDoc = await Folder.findOne({ _id: output.upsertedId });
 
         fileBroadcast('folderUploaded', userID, [folderDoc]);
 

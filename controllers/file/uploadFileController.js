@@ -6,14 +6,6 @@ const File = require('../../models/Files');
 
 require('dotenv').config();
 
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-});
-
 const uploadFileController = async (req, res, next) => {
     try {
         const { userID, pathIds, pathNames, parentID, fileName, fileSize, fileType } = req.body;
