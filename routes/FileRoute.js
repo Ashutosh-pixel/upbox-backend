@@ -17,6 +17,8 @@ const fileResumeInitiateController = require('../controllers/file/fileResumeInit
 const multipartUploadFileController = require('../controllers/file/multipartUploadFileController');
 const renameFileController = require('../controllers/file/renameFileController');
 const fileMultipartUpload = require('../controllers/file/fileMultipartUpload');
+const systemCancelMultipartUploadController = require('../controllers/file/systemCancelMultipartUploadController');
+const systemCancelFileUploadController = require('../controllers/file/systemCancelFileUploadController');
 
 fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
 fileRoute.post('/pastefile', folderHierarchy, pasteFileController);
@@ -33,5 +35,6 @@ fileRoute.post('/file/uploadsession/uploadparts', sessionUploadPartsController);
 fileRoute.post('/file/resume/initiate', fileResumeInitiateController);
 fileRoute.post('/uploadfile/initiate', multipartUploadFileController, fileUploadInitiateController);
 fileRoute.post('/file/rename', renameFileController, fileMultipartUpload);
+fileRoute.put('/file/:fileID', systemCancelMultipartUploadController, systemCancelFileUploadController);
 
 module.exports = fileRoute;

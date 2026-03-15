@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const uploadPartSchema = new mongoose.Schema({
     PartNumber: Number,
     ETag: String
-}, {_id: false});
+}, { _id: false });
 
 const UploadSessionSchema = new mongoose.Schema({
     sessionID: {
@@ -41,12 +41,12 @@ const UploadSessionSchema = new mongoose.Schema({
     status: {
         type: String,
         default: "Progress",
-        enum: ['Progress', 'Completed', 'Aborted']
+        enum: ['Progress', 'Completed', 'Failed', 'Cancelled']
     }
 
-}, {timestamps: true});
+}, { timestamps: true });
 
-UploadSessionSchema.index({userID:1, fileName:1, sessionID:1}, {unique: true});
+UploadSessionSchema.index({ userID: 1, fileName: 1, sessionID: 1 }, { unique: true });
 const UploadSession = mongoose.model('uploadsession', UploadSessionSchema);
 
 module.exports = UploadSession;
