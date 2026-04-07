@@ -4,39 +4,46 @@ const safeFileCreateService = require("../../services/safeFileCreateService");
 
 const renameFileController = async (req, res, next) => {
     try {
-        const { userID, parentID, file } = req.body;
+        const { userID, parentID, filename, type } = req.body;
 
-        // split name into base + extension
-        const dotIndex = file.originalName.lastIndexOf('.');
-        const base = dotIndex !== -1 ? file.originalName.substring(0, dotIndex) : file.originalName;
-        const ext = dotIndex !== -1 ? file.originalName.substring(dotIndex) : "";
+        // split name
+        const dotIndex = filename.lastIndexOf('.');
+        const base = dotIndex !== -1 ? filename.substring(0, dotIndex) : filename;
+        const ext = dotIndex !== -1 ? filename.substring(dotIndex) : "";
 
+        // match base and numbered variants
         const regex = new RegExp(`^${base}( \\(\\d+\\))?${ext}$`);
 
-        const existing = await File.find({ userID, parentID, type: file.type, status: 'Completed', filename: regex });
+        const existing = await File.find({
+            userID,
+            parentID,
+            type,
+            status: 'Completed',
+            filename: regex
+        });
 
         let max = 0;
 
         existing.forEach(f => {
-            const match = f.filename.match(/\((\d+)\)\./);
-            if (match) max = Math.max(max, parseInt(match[1]));
+            // check numbered files
+            const match = f.filename.match(/\((\d+)\)/);
+            if (match) {
+                max = Math.max(max, parseInt(match[1]));
+            } else {
+                // base file exists → at least (1)
+                max = Math.max(max, 0);
+            }
         });
 
-        // computing new file name safely
-        const newFile = await safeFileCreateService(userID, parentID, base, ext, existing)
+        // next available number
+        const newFileName = `${base} (${max + 1})${ext}`;
 
-        req.body.fileName = newFile.filename;
-        req.body.fileSize = newFile.size;
-        req.body.fileType = newFile.type;
-        req.body.fileID = newFile._id;
-        req.body.storagePath = newFile.storagePath;
-
-        next();
+        res.status(200).json({ newName: newFileName });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'File rename failed' });
     }
-}
+};
 
 module.exports = renameFileController;
