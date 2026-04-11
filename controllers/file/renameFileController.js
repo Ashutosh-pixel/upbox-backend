@@ -18,7 +18,6 @@ const renameFileController = async (req, res, next) => {
             userID,
             parentID,
             type,
-            status: 'Completed',
             filename: regex
         });
 

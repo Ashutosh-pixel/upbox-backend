@@ -8,7 +8,7 @@ const pasteFolderController = require("../controllers/folder/pasteFolderControll
 
 const multer = require("multer");
 const pasteFilesController = require("../controllers/file/pasteFilesController");
-const batchFileExistanceController = require('../controllers/file/batchFilesExistanceController');
+const checkFolderFilesDuplicateController = require('../controllers/file/batchFilesExistanceController');
 const upload = multer();
 
 const folderRoute = express.Router();
@@ -17,6 +17,6 @@ folderRoute.post('/createfolder', folderHierarchy, createFolderController);
 folderRoute.get('/getallfolder', getFolderController);
 folderRoute.post('/uploadfolder', folderHierarchy, searchAndCreateFolder)
 folderRoute.post('/pastefolder', upload.array('files'), folderHierarchy, pasteFolderController, pasteFilesController);
-folderRoute.post('/folderupload/bulkfilescheck', batchFileExistanceController);
+folderRoute.post('/folderupload/bulkfilescheck', checkFolderFilesDuplicateController);
 
 module.exports = folderRoute;
