@@ -22,7 +22,7 @@ const systemCancelFileUploadController = require('../controllers/file/systemCanc
 const checkFileDuplicateController = require('../controllers/file/checkFileDuplicateController');
 
 fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
-fileRoute.post('/pastefile', folderHierarchy, pasteFileController);
+fileRoute.post('/pastefile', pasteFileController);
 // fileRoute.get('/files/:userID', readFilesController);
 fileRoute.get('/files', readFilesController);
 fileRoute.get('/file/:fileID', getPresignedFileURLController);

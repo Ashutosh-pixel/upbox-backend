@@ -3,46 +3,116 @@ const { v4: uuidv4 } = require("uuid");
 const File = require("../../models/Files");
 const { fileBroadcast } = require("../../utils/sse/sseManager");
 const Folder = require("../../models/Folder");
+const { default: mongoose } = require("mongoose");
 
 require('dotenv').config();
 
 const pasteFileController = async (req, res) => {
     try {
-        const { userID, pathIds, pathNames, parentID, name, size, type, originalStoragePath } = req.body;
+        let { userID, parentID, fileID } = req.body;
 
-        const folderHierarchy = pathNames.join('/');
-        const filename = name;
-        const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}-${filename}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${filename}`;
-
-        const output = await File.updateOne(
-            { userID, parentID, filename },
-            { $setOnInsert: { userID, filename, size: size, type: type, storagePath, sourcePath: originalStoragePath, parentID, pathIds, pathNames, status: 'Completed' } },
-            { upsert: true }
-        )
-
-        if (output.upsertedCount === 0) {
-            return res.status(409).json({ message: "File already exists", output: output });
+        if (!userID || !fileID || parentID === undefined) {
+            return res.status(400).json({ message: "Invalid input" });
         }
-        // const params = {
-        //     Bucket: process.env.S3_BUCKET_NAME,
-        //     Key: storagePath,
-        //     CopySource: `${process.env.S3_BUCKET_NAME}/${originalStoragePath}`
-        // }
-        //
-        // const command = new CopyObjectCommand(params);
 
-        // await s3.send(command);
+        // Normalize IDs
+        userID = new mongoose.Types.ObjectId(userID);
+        fileID = new mongoose.Types.ObjectId(fileID);
 
-        const fileDoc = await File.findOne({ _id: output.upsertedId });
+        if (parentID === "null") parentID = null;
+        if (parentID) parentID = new mongoose.Types.ObjectId(parentID);
 
-        fileBroadcast("fileUploaded", userID, [fileDoc]);
-        res.status(200).json({ message: 'File copy successfully!' });
+        // 1. Get source file
+        const sourceFile = await File.findById(fileID);
+        if (!sourceFile) {
+            return res.status(404).json({ message: "Source file not found" });
+        }
 
-    }
-    catch (error) {
+        // 2. Get destination folder (if any)
+        let destiFolder = null;
+        let newPathNames = [];
+        let newPathIds = [];
+
+        if (parentID) {
+            destiFolder = await Folder.findById(parentID);
+
+            if (!destiFolder) {
+                return res.status(404).json({ message: "Destination folder not found" });
+            }
+
+            // derive from destination
+            newPathNames = [...destiFolder.pathNames, destiFolder.name];
+            newPathIds = [...destiFolder.pathIds, parentID];
+        }
+
+        const filename = sourceFile.filename;
+
+        // 3. Handle duplicate filename (auto rename)
+        let finalName = filename;
+        let counter = 1;
+
+        while (true) {
+            const exists = await File.findOne({
+                userID,
+                parentID,
+                filename: finalName,
+                type: sourceFile.type,
+                status: "Completed"
+            });
+
+            if (!exists) break;
+
+            const extIndex = filename.lastIndexOf(".");
+            const name = extIndex !== -1 ? filename.substring(0, extIndex) : filename;
+            const ext = extIndex !== -1 ? filename.substring(extIndex) : "";
+
+            finalName = `${name} (${counter})${ext}`;
+            counter++;
+        }
+
+        // 4. Build storage path
+        const storagePath = parentID
+            ? `user-${userID}/uploads/${newPathNames.join("/")}/${uuidv4()}-${finalName}`
+            : `user-${userID}/uploads/${uuidv4()}-${finalName}`;
+
+        // 5. Insert new file (no mutation of source)
+        const newFile = await File.create({
+            userID,
+            filename: finalName,
+            size: sourceFile.size,
+            type: sourceFile.type,
+            storagePath,
+            sourcePath: sourceFile.storagePath, // reference original
+            parentID,
+            pathIds: newPathIds.length ? newPathIds : [...newPathIds, null],
+            pathNames: newPathNames,
+            status: "Completed"
+        });
+
+        // 6. (Optional) S3 Copy → if you want physical copy
+        /*
+        const params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: storagePath,
+            CopySource: `${process.env.S3_BUCKET_NAME}/${sourceFile.storagePath}`
+        };
+
+        const command = new CopyObjectCommand(params);
+        await s3.send(command);
+        */
+
+        // 7. Broadcast
+        fileBroadcast("fileUploaded", userID, [newFile]);
+
+        res.status(200).json({
+            message: "File copied successfully",
+            file: newFile
+        });
+
+    } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'File copy failed' });
+        res.status(500).json({ message: "File copy failed" });
     }
-}
+};
 
 module.exports = pasteFileController;
