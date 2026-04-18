@@ -7,6 +7,10 @@ const getPresignedURLController = async (req, res) => {
     try {
         const { fileName, uploadId, partNumber, storagePath } = req.query;
 
+        if (!uploadId || !partNumber || !storagePath) {
+            return res.status(400).json({ message: "Missing required query params" });
+        }
+
         // console.log('file get url key ', fileName, uploadId, partNumber, storagePath)
 
         const command = new UploadPartCommand({

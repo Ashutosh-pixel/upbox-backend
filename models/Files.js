@@ -51,8 +51,8 @@ const FileSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-FileSchema.index({ userID: 1, parentID: 1, filename: 1 }, { unique: true })
-FileSchema.index({ userID: 1, parentID: 1, filename: 1, type: 1 }, { unique: true, partialFilterExpression: {status: 'Completed'} });
+// FileSchema.index({ userID: 1, parentID: 1, filename: 1 }, { unique: true })
+FileSchema.index({ userID: 1, parentID: 1, filename: 1, type: 1 }, { unique: true, partialFilterExpression: { status: 'Completed' } });
 const File = mongoose.model('File', FileSchema);
 
 module.exports = File;

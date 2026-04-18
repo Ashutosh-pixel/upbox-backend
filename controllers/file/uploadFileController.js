@@ -16,8 +16,8 @@ const uploadFileController = async (req, res, next) => {
         const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}-${filename}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${filename}`
 
         const output = await File.updateOne(
-            { userID, parentID, filename },
-            { $setOnInsert: { userID, filename, size: fileSize, type: fileType, storagePath, parentID, pathIds, pathNames } },
+            { userID, parentID, filename, type: fileType, status: 'Completed' },
+            { $setOnInsert: { userID, filename, size: fileSize, type: fileType, storagePath, parentID, pathIds, pathNames, status: "Progress" } },
             { upsert: true }
         )
 
