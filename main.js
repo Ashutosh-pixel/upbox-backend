@@ -14,7 +14,7 @@ app.use(express.json());
 
 const corsOptions = {
   origin: '*',
-  methods: ['GET', 'POST', 'PUT'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH'],
   credentials: true,
 };
 

@@ -48,6 +48,10 @@ const FileSchema = new mongoose.Schema({
         type: String,
         default: "Progress",
         enum: ['Progress', 'Completed', 'Failed', 'Cancelled']
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 

@@ -20,6 +20,7 @@ const fileMultipartUpload = require('../controllers/file/fileMultipartUpload');
 const systemCancelMultipartUploadController = require('../controllers/file/systemCancelMultipartUploadController');
 const systemCancelFileUploadController = require('../controllers/file/systemCancelFileUploadController');
 const checkFileDuplicateController = require('../controllers/file/checkFileDuplicateController');
+const fileRenameController = require('../controllers/Rename/fileRenameController');
 
 fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
 fileRoute.post('/pastefile', pasteFileController);
@@ -38,5 +39,6 @@ fileRoute.post('/uploadfile/initiate', multipartUploadFileController, fileUpload
 fileRoute.post('/file/rename', renameFileController);
 fileRoute.put('/file/:fileID', systemCancelMultipartUploadController, systemCancelFileUploadController);
 fileRoute.post('/file/checkduplicatefiles', checkFileDuplicateController);
+fileRoute.patch('/file/fileRename', fileRenameController);
 
 module.exports = fileRoute;
