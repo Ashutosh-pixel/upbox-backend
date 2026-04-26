@@ -8,16 +8,17 @@ require('dotenv').config();
 
 const uploadFileController = async (req, res, next) => {
     try {
-        const { userID, pathIds, pathNames, parentID, fileName, fileSize, fileType } = req.body;
+        const { userId } = req.user;
+        const { pathIds, pathNames, parentID, fileName, fileSize, fileType } = req.body;
 
         // atomic create + insert in file schema to avoid race condition
         const folderHierarchy = pathNames.join('/');
         const filename = fileName;
-        const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}-${filename}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${filename}`
+        const storagePath = !parentID ? `user-${userId}/uploads/${uuidv4()}-${filename}` : `user-${userId}/uploads/${folderHierarchy}/${uuidv4()}-${filename}`
 
         const output = await File.updateOne(
-            { userID, parentID, filename, type: fileType, status: 'Completed' },
-            { $setOnInsert: { userID, filename, size: fileSize, type: fileType, storagePath, parentID, pathIds, pathNames, status: "Progress" } },
+            { userID: userId, parentID, filename, type: fileType, status: 'Completed' },
+            { $setOnInsert: { userID: userId, filename, size: fileSize, type: fileType, storagePath, parentID, pathIds, pathNames, status: "Progress" } },
             { upsert: true }
         )
 

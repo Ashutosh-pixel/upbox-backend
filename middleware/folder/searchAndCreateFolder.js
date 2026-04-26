@@ -2,24 +2,26 @@ const Folder = require("../../models/Folder");
 const mongoose = require("mongoose");
 const { fileBroadcast } = require("../../utils/sse/sseManager");
 
-const searchAndCreateFolder = async (req,res,next) => {
-    const { userID, pathIds, pathNames } = req.body;
+const searchAndCreateFolder = async (req, res, next) => {
+    const { userId } = req.user;
+    const { pathIds, pathNames } = req.body;
     const selectedFolders = req.body.folders;
     const parentID = req.body.parentID;
+    const userID = userId;
 
-    try{
+    try {
         const folderHierarchy = pathNames.join('/');
 
         const folderMap = new Map();
 
-        if(selectedFolders.length){
+        if (selectedFolders.length) {
             const storagePath = !folderHierarchy ? `user-${userID}/uploads/${selectedFolders[0].name}/` : `user-${userID}/uploads/${folderHierarchy}/${selectedFolders[0].name}/`;
 
-            const folderDoc = await Folder.findOne({storagePath: storagePath});
+            const folderDoc = await Folder.findOne({ storagePath: storagePath });
 
-            const parentFolderDoc = await Folder.findOne({_id: parentID, userID: userID});
+            const parentFolderDoc = await Folder.findOne({ _id: parentID, userID: userID });
 
-            if(folderDoc) folderMap.set(selectedFolders[0].path, folderDoc);
+            if (folderDoc) folderMap.set(selectedFolders[0].path, folderDoc);
 
             else {
                 const folderDoc = await Folder.create({
@@ -39,11 +41,11 @@ const searchAndCreateFolder = async (req,res,next) => {
 
         }
 
-        for (let i=1; i < selectedFolders.length; i++){
+        for (let i = 1; i < selectedFolders.length; i++) {
             const storagePath = !folderHierarchy ? `user-${userID}/uploads/${selectedFolders[i].path}` : `user-${userID}/uploads/${folderHierarchy}/${selectedFolders[i].path}`;
-            const folderDoc = await Folder.findOne({storagePath: storagePath});
+            const folderDoc = await Folder.findOne({ storagePath: storagePath });
 
-            if(folderDoc) folderMap.set(selectedFolders[i].path, folderDoc);
+            if (folderDoc) folderMap.set(selectedFolders[i].path, folderDoc);
             else {
                 const folderDoc = await Folder.create({
                     userID: userID,
@@ -61,7 +63,7 @@ const searchAndCreateFolder = async (req,res,next) => {
         // console.log('map', folderMap);
         res.status(200).json({ folderMap: Object.fromEntries(folderMap) });
     }
-    catch (e){
+    catch (e) {
         console.log('error', e);
         res.status(500).json({ message: "Error in folder upload" });
     }

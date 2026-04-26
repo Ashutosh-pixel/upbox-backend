@@ -8,15 +8,16 @@ require('dotenv').config();
 
 const multipartUploadFileController = async (req, res, next) => {
     try {
-        const { userID, pathIds, pathNames, parentID, fileName, fileSize, fileType, storagePath } = req.body;
+        const { userId } = req.user;
+        const { pathIds, pathNames, parentID, fileName, fileSize, fileType, storagePath } = req.body;
 
         // atomic create + insert in file schema to avoid race condition
         const folderHierarchy = pathNames.join('/');
         const filename = fileName;
 
         const output = await File.updateOne(
-            { userID, parentID, filename },
-            { $setOnInsert: { userID, filename, size: fileSize, type: fileType, storagePath, parentID, pathIds, pathNames } },
+            { userID: userId, parentID, filename },
+            { $setOnInsert: { userID: userId, filename, size: fileSize, type: fileType, storagePath, parentID, pathIds, pathNames } },
             { upsert: true }
         )
 

@@ -6,14 +6,18 @@ const folderRoute = require("./routes/FolderRoute");
 const { fileBroadcast } = require("./utils/sse/sseManager");
 const clients = require("./utils/sse/clients");
 const globalSearch = require('./controllers/search/globalSearch');
+const cookieParser = require('cookie-parser');
+const authRouter = require('./routes/AuthRoute');
+const apiAuth = require('./middleware/auth/authMiddleware');
 
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 const corsOptions = {
-  origin: '*',
+  origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'PATCH'],
   credentials: true,
 };
@@ -31,6 +35,7 @@ connectDB()
     process.exit(1)
   })
 
+app.use("/auth", authRouter);
 app.use('/user', fileRoute);
 app.use('/folder', folderRoute);
 app.get('/', (req, res) => {
@@ -38,13 +43,13 @@ app.get('/', (req, res) => {
 })
 app.get("/search", globalSearch);
 
-app.get('/connection/:userID', async (req, res) => {
+app.get('/connection', apiAuth, async (req, res) => {
   res.setHeader('Content-Type', "text/event-stream");
   res.setHeader('Cache-Control', "no-cache");
   res.setHeader('Connection', "keep-alive");
   res.flushHeaders();
 
-  const userID = req.params.userID;
+  const userID = req.user.userId;
 
   if (!clients.has(userID)) {
     // store the SSE response object so we can write to it later
@@ -60,7 +65,7 @@ app.get('/connection/:userID', async (req, res) => {
 });
 
 app.post("/lambda/notify", async (req, res) => {
-  // console.log("lambda/notify", req.body);
+  console.log("lambda/notify", req.body);
 
   fileBroadcast("fileUploaded", req.body.userID, [req.body]);
 

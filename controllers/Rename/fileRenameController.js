@@ -4,14 +4,17 @@ const { fileBroadcast } = require("../../utils/sse/sseManager");
 
 const fileRenameController = async (req, res) => {
     try {
-        const { fileName, autoRename, userID, fileID } = req.body;
+        const { userId } = req.user;
+        const { fileName, autoRename, fileID } = req.body;
 
-        if (!fileName.trim() || !userID || !fileID) {
+        console.log("req.bidy", req.body)
+
+        if (!fileName.trim() || !userId || !fileID) {
             return res.status(400).json({ message: "Missing required parameters", errorCode: "DETAILS_MISSING" })
         }
 
         const updated = await File.findOneAndUpdate(
-            { _id: fileID, status: 'Completed', isDeleted: false, userID: new mongoose.Types.ObjectId(userID) },
+            { _id: fileID, status: 'Completed', isDeleted: false, userID: new mongoose.Types.ObjectId(userId) },
             { $set: { filename: fileName.trim() } },
             { new: true }
         )
@@ -26,7 +29,7 @@ const fileRenameController = async (req, res) => {
             parentID: updated.parentID
         }
 
-        fileBroadcast("fileRenamed", userID, [output]);
+        fileBroadcast("fileRenamed", userId, [output]);
 
         res.status(200).json({ message: "File updated", successCode: "OK" })
 

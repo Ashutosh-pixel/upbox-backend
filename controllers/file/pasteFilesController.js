@@ -7,7 +7,10 @@ const { ObjectId } = mongoose.Types;
 require('dotenv').config();
 
 const pasteFilesController = async (req, res) => {
-    const { userID, id, idMap, newFolders } = req.body;
+    const { userId } = req.user;
+    const { id, idMap, newFolders } = req.body;
+    const userID = userId;
+
     try {
         const files = await File.find({ userID, pathIds: { $in: [id] } }).lean();
         console.log('files', files);

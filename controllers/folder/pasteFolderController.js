@@ -1,10 +1,12 @@
 const Folder = require("../../models/Folder");
 const mongoose = require("mongoose");
-const {fileBroadcast} = require("../../utils/sse/sseManager");
+const { fileBroadcast } = require("../../utils/sse/sseManager");
 const { ObjectId } = mongoose.Types;
 
 const pasteFolderController = async (req, res, next) => {
-    const {id, name, parentID, userID, pathIds, pathNames} = req.body;
+    const { userId } = req.user;
+    const { id, name, parentID, pathIds, pathNames } = req.body;
+    const userID = userId;
 
 
     try {
@@ -13,8 +15,8 @@ const pasteFolderController = async (req, res, next) => {
         const storagePath = !folderHierarchy ? `user-${userID}/uploads/${name}/` : `user-${userID}/uploads/${folderHierarchy}/${name}/`;
 
         // duplicate folder check
-        const output = await Folder.findOne({userID: userID, name: name, parentID: parentID});
-        if(output){
+        const output = await Folder.findOne({ userID: userID, name: name, parentID: parentID });
+        if (output) {
             return res.status(409).json({ message: "Folder already exists", output: output });
         }
 
@@ -30,7 +32,7 @@ const pasteFolderController = async (req, res, next) => {
         }
 
         // find all the subfolders and childern
-        const folders = await Folder.find({userID, pathIds: {$in: [id]}}).lean();
+        const folders = await Folder.find({ userID, pathIds: { $in: [id] } }).lean();
 
         // map (oldId, newId)
         const idMap = new Map();
@@ -54,7 +56,7 @@ const pasteFolderController = async (req, res, next) => {
         })
 
         const newIdMap = new Map();
-        newIdMap.set(rootFolderDoc._id.toString(),rootFolderDoc);
+        newIdMap.set(rootFolderDoc._id.toString(), rootFolderDoc);
         newFolders.map((folder) => {
             newIdMap.set(folder._id.toString(), folder);
         })
@@ -65,7 +67,7 @@ const pasteFolderController = async (req, res, next) => {
         // recompute all folders pathIds, pathNames, storagePath
         newFolders.map((folder) => {
             let parentFolder;
-            if(folder.parentID && newIdMap.get(folder.parentID.toString())){
+            if (folder.parentID && newIdMap.get(folder.parentID.toString())) {
                 parentFolder = newIdMap.get(folder.parentID.toString());
                 folder.storagePath = parentFolder.storagePath + `${folder.name}/`;
                 folder.pathIds = parentFolder.pathIds;

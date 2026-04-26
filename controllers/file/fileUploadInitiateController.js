@@ -4,7 +4,8 @@ const { s3 } = require("../../utils/config");
 
 const fileUploadInitiateController = async (req, res) => {
     try {
-        const { fileName, userID, fileSize, chunkSize, totalParts, storagePath, fileID, fileType, parentID } = req.body;
+        const { userId } = req.user;
+        const { fileName, fileSize, chunkSize, totalParts, storagePath, fileID, fileType, parentID } = req.body;
 
         // console.log('body', req.body);
 
@@ -14,7 +15,7 @@ const fileUploadInitiateController = async (req, res) => {
                 Key: storagePath,
                 Metadata: {
                     'x-amz-meta-filename': String(fileName),
-                    'x-amz-meta-userid': String(userID),
+                    'x-amz-meta-userid': String(userId),
                     'x-amz-meta-filesize': String(fileSize),
                     'x-amz-meta-filetype': String(fileType),
                     'x-amz-meta-id': String(fileID),

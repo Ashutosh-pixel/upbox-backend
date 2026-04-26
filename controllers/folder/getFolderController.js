@@ -2,7 +2,8 @@ const Folder = require("../../models/Folder");
 const getFolderController = async (req, res) => {
     try {
         let parentID = req.query.parentID;
-        const userID = req.query.userID;
+        const { userId } = req.user;
+        const userID = userId;
 
         if (parentID === 'null') {
             parentID = null;

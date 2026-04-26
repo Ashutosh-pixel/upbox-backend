@@ -21,24 +21,25 @@ const systemCancelMultipartUploadController = require('../controllers/file/syste
 const systemCancelFileUploadController = require('../controllers/file/systemCancelFileUploadController');
 const checkFileDuplicateController = require('../controllers/file/checkFileDuplicateController');
 const fileRenameController = require('../controllers/Rename/fileRenameController');
+const apiAuth = require('../middleware/auth/authMiddleware');
 
-fileRoute.post('/uploadfile', upload.single('file'), folderHierarchy, uploadFileController, fileUploadInitiateController);
-fileRoute.post('/pastefile', pasteFileController);
+fileRoute.post('/uploadfile', upload.single('file'), apiAuth, folderHierarchy, uploadFileController, fileUploadInitiateController);
+fileRoute.post('/pastefile', apiAuth, pasteFileController);
 // fileRoute.get('/files/:userID', readFilesController);
-fileRoute.get('/files', readFilesController);
+fileRoute.get('/files', apiAuth, readFilesController);
 fileRoute.get('/file/:fileID', getPresignedFileURLController);
-fileRoute.get('/files/videos/:userID', readVideosController);
-fileRoute.get('/files/documents/:userID', readDocumentsController);
+fileRoute.get('/files/videos/:userID', apiAuth, readVideosController);
+fileRoute.get('/files/documents/:userID', apiAuth, readDocumentsController);
 fileRoute.get('/file/image', readImageS3Controller);
 // fileRoute.post('/file/upload/initiate', fileUploadInitiateController);
 fileRoute.get('/file/upload/url', getPresignedURLController);
 fileRoute.post('/file/upload/complete', fileChunksAssemblyController);
-fileRoute.post('/file/uploadsession/uploadparts', sessionUploadPartsController);
-fileRoute.post('/file/resume/initiate', fileResumeInitiateController);
-fileRoute.post('/uploadfile/initiate', multipartUploadFileController, fileUploadInitiateController);
-fileRoute.post('/file/rename', renameFileController);
+fileRoute.post('/file/uploadsession/uploadparts', apiAuth, sessionUploadPartsController);
+fileRoute.post('/file/resume/initiate', apiAuth, fileResumeInitiateController);
+fileRoute.post('/uploadfile/initiate', apiAuth, multipartUploadFileController, fileUploadInitiateController);
+fileRoute.post('/file/rename', apiAuth, renameFileController);
 fileRoute.put('/file/:fileID', systemCancelMultipartUploadController, systemCancelFileUploadController);
-fileRoute.post('/file/checkduplicatefiles', checkFileDuplicateController);
-fileRoute.patch('/file/fileRename', fileRenameController);
+fileRoute.post('/file/checkduplicatefiles', apiAuth, checkFileDuplicateController);
+fileRoute.patch('/file/fileRename', apiAuth, fileRenameController);
 
 module.exports = fileRoute;

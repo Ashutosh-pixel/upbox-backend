@@ -3,12 +3,13 @@ const mongoose = require("mongoose")
 
 const readFilesController = async (req, res) => {
   try {
-    const userID = req.query.userID;
+    const { userId } = req.user;
+    // const userId = req.query.userID;  //check in future
     const parentID = req.query.parentID === "null" ? null : req.query.parentID;
     const cursor = req.query.cursor;
     const limit = Number(req.query.limit);
 
-    const query = { userID, parentID, status: "Completed" }
+    const query = { userID: userId, parentID, status: "Completed" }
 
     if (cursor) {
       query._id = { $lt: new mongoose.Types.ObjectId(cursor) }

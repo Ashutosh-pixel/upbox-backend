@@ -3,11 +3,11 @@ const File = require("../../models/Files");
 
 const checkFileDuplicateController = async (req, res) => {
   try {
-
-    const { userID, files } = req.body;
+    const { userId } = req.user;
+    const { files } = req.body;
 
     const existance = await File.find({
-      userID: userID,
+      userID: userId,
       $or: files.map((f) => ({
         parentID: f.parentID === "null" ? null : f.parentID,
         filename: f.filename,

@@ -4,7 +4,8 @@ const safeFileCreateService = require("../../services/safeFileCreateService");
 
 const renameFileController = async (req, res, next) => {
     try {
-        const { userID, parentID, filename, type } = req.body;
+        const { userId } = req.user;
+        const { parentID, filename, type } = req.body;
 
         // split name
         const dotIndex = filename.lastIndexOf('.');
@@ -15,7 +16,7 @@ const renameFileController = async (req, res, next) => {
         const regex = new RegExp(`^${base}( \\(\\d+\\))?${ext}$`);
 
         const existing = await File.find({
-            userID,
+            userID: userId,
             parentID,
             type,
             filename: regex

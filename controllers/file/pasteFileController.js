@@ -9,14 +9,15 @@ require('dotenv').config();
 
 const pasteFileController = async (req, res) => {
     try {
-        let { userID, parentID, fileID } = req.body;
+        let { userId } = req.user;
+        let { parentID, fileID } = req.body;
 
-        if (!userID || !fileID || parentID === undefined) {
+        if (!userId || !fileID || parentID === undefined) {
             return res.status(400).json({ message: "Invalid input" });
         }
 
         // Normalize IDs
-        userID = new mongoose.Types.ObjectId(userID);
+        userId = new mongoose.Types.ObjectId(userId);
         fileID = new mongoose.Types.ObjectId(fileID);
 
         if (parentID === "null") parentID = null;
@@ -53,7 +54,7 @@ const pasteFileController = async (req, res) => {
 
         while (true) {
             const exists = await File.findOne({
-                userID,
+                userID: userId,
                 parentID,
                 filename: finalName,
                 type: sourceFile.type,
@@ -72,12 +73,12 @@ const pasteFileController = async (req, res) => {
 
         // 4. Build storage path
         const storagePath = parentID
-            ? `user-${userID}/uploads/${newPathNames.join("/")}/${uuidv4()}-${finalName}`
-            : `user-${userID}/uploads/${uuidv4()}-${finalName}`;
+            ? `user-${userId}/uploads/${newPathNames.join("/")}/${uuidv4()}-${finalName}`
+            : `user-${userId}/uploads/${uuidv4()}-${finalName}`;
 
         // 5. Insert new file (no mutation of source)
         const newFile = await File.create({
-            userID,
+            userID: userId,
             filename: finalName,
             size: sourceFile.size,
             type: sourceFile.type,
@@ -102,7 +103,7 @@ const pasteFileController = async (req, res) => {
         */
 
         // 7. Broadcast
-        fileBroadcast("fileUploaded", userID, [newFile]);
+        fileBroadcast("fileUploaded", userId, [newFile]);
 
         res.status(200).json({
             message: "File copied successfully",

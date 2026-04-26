@@ -3,8 +3,9 @@ const File = require("../../models/Files");
 
 const batchFilesExistanceController = async (req, res) => {
     try {
-
-        const { userID, files } = req.body;
+        const { userId } = req.user;
+        const { files } = req.body;
+        const userID = userId;
 
         const existance = await File.find({
             userID: userID,

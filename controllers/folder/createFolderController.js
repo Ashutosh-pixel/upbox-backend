@@ -6,7 +6,9 @@ require('dotenv').config();
 
 const createFolderController = async (req, res) => {
     try {
-        const { name, parentID, userID, folderPath, pathIds, pathNames } = req.body;
+        const { userId } = req.user;
+        const { name, parentID, folderPath, pathIds, pathNames } = req.body;
+        const userID = userId;
 
         const folderHierarchy = pathNames.join('/');
         const storagePath = !folderHierarchy ? `user-${userID}/uploads/${folderPath}/` : `user-${userID}/uploads/${folderHierarchy}/${folderPath}/`
