@@ -19,8 +19,14 @@ const pasteFilesController = async (req, res) => {
             const newfolderid = idMap.get(file?.parentID.toString());
             for (const folder of newFolders) {
                 if (newfolderid === folder._id) {
+
+
+                    const extIndex = (await file).filename.lastIndexOf(".");
+                    const ext = extIndex !== -1 ? (await file).filename.substring(extIndex) : "";
+
+
                     const folderHierarchy = folder.pathNames.join('/');
-                    const storagePath = `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${(await file).filename}`
+                    const storagePath = `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}${ext}`
                     const newFile = {
                         _id: new ObjectId(),
                         userID: userID,

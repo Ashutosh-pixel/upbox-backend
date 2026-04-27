@@ -71,10 +71,14 @@ const pasteFileController = async (req, res) => {
             counter++;
         }
 
+        const extIndex = finalName.lastIndexOf(".");
+        const name = extIndex !== -1 ? finalName.substring(0, extIndex) : finalName;
+        const ext = extIndex !== -1 ? finalName.substring(extIndex) : "";
+
         // 4. Build storage path
         const storagePath = parentID
-            ? `user-${userId}/uploads/${newPathNames.join("/")}/${uuidv4()}-${finalName}`
-            : `user-${userId}/uploads/${uuidv4()}-${finalName}`;
+            ? `user-${userId}/uploads/${newPathNames.join("/")}/${uuidv4()}${ext}`
+            : `user-${userId}/uploads/${uuidv4()}${ext}`;
 
         // 5. Insert new file (no mutation of source)
         const newFile = await File.create({
@@ -103,7 +107,7 @@ const pasteFileController = async (req, res) => {
         */
 
         // 7. Broadcast
-        fileBroadcast("fileUploaded", userId, [newFile]);
+        fileBroadcast("fileUploaded", userId.toString(), [newFile]);
 
         res.status(200).json({
             message: "File copied successfully",

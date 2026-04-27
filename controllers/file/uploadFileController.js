@@ -14,7 +14,11 @@ const uploadFileController = async (req, res, next) => {
         // atomic create + insert in file schema to avoid race condition
         const folderHierarchy = pathNames.join('/');
         const filename = fileName;
-        const storagePath = !parentID ? `user-${userId}/uploads/${uuidv4()}-${filename}` : `user-${userId}/uploads/${folderHierarchy}/${uuidv4()}-${filename}`
+
+        const extIndex = filename.lastIndexOf(".");
+        const ext = extIndex !== -1 ? filename.substring(extIndex) : "";
+
+        const storagePath = !parentID ? `user-${userId}/uploads/${uuidv4()}${ext}` : `user-${userId}/uploads/${folderHierarchy}/${uuidv4()}${ext}`
 
         const output = await File.updateOne(
             { userID: userId, parentID, filename, type: fileType, status: 'Completed' },

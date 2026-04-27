@@ -9,7 +9,7 @@ async function safeFileCreateService(userID, parentID, base, ext, existing) {
             const newName = `${base} (${max + 1})${ext}`;
 
             const folderHierarchy = existing[0].pathNames.join('/');
-            const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}-${newName}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}-${newName}`
+            const storagePath = !parentID ? `user-${userID}/uploads/${uuidv4()}${ext}` : `user-${userID}/uploads/${folderHierarchy}/${uuidv4()}${ext}`
 
             console.log('newName', newName)
 
