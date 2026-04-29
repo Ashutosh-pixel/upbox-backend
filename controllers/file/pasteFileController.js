@@ -4,12 +4,15 @@ const File = require("../../models/Files");
 const { fileBroadcast } = require("../../utils/sse/sseManager");
 const Folder = require("../../models/Folder");
 const { default: mongoose } = require("mongoose");
+const { checkAndReserveStorage, checkAndReleaseStorage, failedAndReleaseStorage } = require("../../services/checkAndReserveStorage");
 
 require('dotenv').config();
 
 const pasteFileController = async (req, res) => {
+    let { userId } = req.user;
+    let fileSize = 0;
+
     try {
-        let { userId } = req.user;
         let { parentID, fileID } = req.body;
 
         if (!userId || !fileID || parentID === undefined) {
@@ -28,6 +31,11 @@ const pasteFileController = async (req, res) => {
         if (!sourceFile) {
             return res.status(404).json({ message: "Source file not found" });
         }
+
+        fileSize = sourceFile.size;
+
+        // check disk storage
+        await checkAndReserveStorage(userId, sourceFile.size);
 
         // 2. Get destination folder (if any)
         let destiFolder = null;
@@ -109,6 +117,9 @@ const pasteFileController = async (req, res) => {
         // 7. Broadcast
         fileBroadcast("fileUploaded", userId.toString(), [newFile]);
 
+        // release disk storage
+        await checkAndReleaseStorage(userId, sourceFile.size);
+
         res.status(200).json({
             message: "File copied successfully",
             file: newFile
@@ -116,6 +127,12 @@ const pasteFileController = async (req, res) => {
 
     } catch (error) {
         console.error(error);
+
+        if (error.message === "Storage limit exceeded") {
+            return res.status(500).json({ message: "Storage limit exceeded", errorCode: 'STORAGE_LIMIT_EXCEEDED' });
+        }
+
+        await failedAndReleaseStorage(userId, fileSize);
         res.status(500).json({ message: "File copy failed" });
     }
 };

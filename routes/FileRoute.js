@@ -33,12 +33,12 @@ fileRoute.get('/files/documents/:userID', apiAuth, readDocumentsController);
 fileRoute.get('/file/image', readImageS3Controller);
 // fileRoute.post('/file/upload/initiate', fileUploadInitiateController);
 fileRoute.get('/file/upload/url', getPresignedURLController);
-fileRoute.post('/file/upload/complete', fileChunksAssemblyController);
+fileRoute.post('/file/upload/complete', apiAuth, fileChunksAssemblyController);
 fileRoute.post('/file/uploadsession/uploadparts', apiAuth, sessionUploadPartsController);
 fileRoute.post('/file/resume/initiate', apiAuth, fileResumeInitiateController);
 fileRoute.post('/uploadfile/initiate', apiAuth, multipartUploadFileController, fileUploadInitiateController);
 fileRoute.post('/file/rename', apiAuth, renameFileController);
-fileRoute.put('/file/:fileID', systemCancelMultipartUploadController, systemCancelFileUploadController);
+fileRoute.put('/file/:fileID', apiAuth, systemCancelMultipartUploadController, systemCancelFileUploadController);
 fileRoute.post('/file/checkduplicatefiles', apiAuth, checkFileDuplicateController);
 fileRoute.patch('/file/fileRename', apiAuth, fileRenameController);
 

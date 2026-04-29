@@ -16,6 +16,21 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    totalStorage: {
+        type: Number,
+        required: true,
+        default: 50 * 1024 * 1024
+    },
+    usedStorage: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    reservedStorage: {
+        type: Number,
+        required: true,
+        default: 0
+    }
 }, { timestamps: true })
 
 const User = mongoose.model('User', UserSchema);

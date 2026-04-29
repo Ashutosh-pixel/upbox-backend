@@ -1,4 +1,5 @@
 const UploadSession = require("../../models/UploadSession");
+const { failedAndReleaseStorage } = require("../../services/checkAndReserveStorage");
 
 const sessionUploadPartsController = async (req, res) => {
     try {
@@ -17,6 +18,7 @@ const sessionUploadPartsController = async (req, res) => {
 
     } catch (error) {
         console.log('error in sessionUploadPart', error);
+        await failedAndReleaseStorage(userId, fileSize);
         res.status(500).json({ message: "sessionUploadPart failed" });
     }
 }
