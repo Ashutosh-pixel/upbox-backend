@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { generateAccessToken } = require("../utils/token");
 const RefreshToken = require("../models/RefreshToken");
+const User = require("../models/User");
 
 const refresh = async (req, res) => {
     const token = req.cookies.refreshToken;
@@ -13,9 +14,11 @@ const refresh = async (req, res) => {
         const exists = await RefreshToken.findOne({ token });
         if (!exists) return res.sendStatus(403);
 
+        const user = await User.findById(decode.userId);
+
         const accessToken = generateAccessToken({ _id: decode.userId });
 
-        return res.json({ accessToken });
+        return res.json({ accessToken, name: user.name, email: user.email });
     } catch (error) {
         console.log("error", error)
         return res.sendStatus(403);

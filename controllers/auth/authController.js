@@ -38,7 +38,7 @@ const login = async (req, res) => {
             secure: true,
             sameSite: "Strict",
             maxAge: 7 * 24 * 60 * 60 * 1000,
-        }).json({ accessToken });
+        }).json({ accessToken, name: user.name, email: user.email });
 
 
     } catch (error) {

@@ -7,9 +7,11 @@ require('dotenv').config();
 const createFolderController = async (req, res) => {
     try {
         const { userId } = req.user;
-        const { name, parentID, folderPath, pathIds, pathNames } = req.body;
+        const { parentID, folderPath, pathIds, pathNames } = req.body;
         const userID = userId;
+        let { name } = req.body;
 
+        name = name.trim();
         const folderHierarchy = pathNames.join('/');
         const storagePath = !folderHierarchy ? `user-${userID}/uploads/${folderPath}/` : `user-${userID}/uploads/${folderHierarchy}/${folderPath}/`
 
@@ -20,7 +22,7 @@ const createFolderController = async (req, res) => {
         )
 
         if (output.upsertedCount === 0) {
-            return res.status(409).json({ message: "Folder already exists", output: output });
+            return res.status(409).json({ message: "Folder already exists", output: output, errorCode: "DUPLICATE_FOLDER" });
         }
 
         const folderDoc = await Folder.findOne({ _id: output.upsertedId });

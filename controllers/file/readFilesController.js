@@ -8,8 +8,21 @@ const readFilesController = async (req, res) => {
     const parentID = req.query.parentID === "null" ? null : req.query.parentID;
     const cursor = req.query.cursor;
     const limit = Number(req.query.limit);
+    const fileType = req.query.type;
 
     const query = { userID: userId, parentID, status: "Completed" }
+
+
+    // Apply type filter
+    if (fileType && fileType !== "all") {
+      if (fileType === "image") {
+        query.type = { $regex: "^image/" };
+      } else if (fileType === "video") {
+        query.type = { $regex: "^video/" };
+      } else if (fileType === "document") {
+        query.type = { $regex: "^application/" };
+      }
+    }
 
     if (cursor) {
       query._id = { $lt: new mongoose.Types.ObjectId(cursor) }

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const FolderSchema = new mongoose.Schema({
     name: {
         type: String,
+        trim: true,
         required: true
     },
     parentID: {
@@ -32,9 +33,9 @@ const FolderSchema = new mongoose.Schema({
         default: Date.now
     },
     status: {
-      type: String,
-      enum: ['Progress', 'Completed', 'Aborted'],
-      default: 'Progress'
+        type: String,
+        enum: ['Progress', 'Completed', 'Aborted'],
+        default: 'Progress'
     }
 }, { timestamps: true })
 
