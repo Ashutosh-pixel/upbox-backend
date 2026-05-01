@@ -1,7 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const File = require("../../models/Files");
 const UploadSession = require("../../models/UploadSession");
-const { checkAndReleaseStorage, failedAndReleaseStorage } = require("../../services/checkAndReserveStorage");
+const { failedAndReleaseStorage } = require("../../services/checkAndReserveStorage");
 
 const systemCancelFileUploadController = async (req, res) => {
     const { userId } = req.user;
@@ -14,7 +14,7 @@ const systemCancelFileUploadController = async (req, res) => {
         await File.findByIdAndUpdate({ _id: new mongoose.Types.ObjectId(fileID) }, { status: "Failed" });
         await UploadSession.findOneAndUpdate({ sessionID: sessionID }, { status: "Failed" });
 
-        await checkAndReleaseStorage(userId, fileSize);
+        await failedAndReleaseStorage(userId, fileSize);
         res.status(200).json({ message: "file upload canceled" });
 
     } catch (error) {

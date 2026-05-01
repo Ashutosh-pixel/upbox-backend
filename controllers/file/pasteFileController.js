@@ -95,7 +95,7 @@ const pasteFileController = async (req, res) => {
             size: sourceFile.size,
             type: sourceFile.type,
             storagePath,
-            sourcePath: sourceFile.storagePath, // reference original
+            sourcePath: sourceFile.sourcePath ? sourceFile.sourcePath : sourceFile.storagePath, // reference original
             parentID,
             pathIds: newPathIds.length ? newPathIds : [...newPathIds, null],
             pathNames: newPathNames,

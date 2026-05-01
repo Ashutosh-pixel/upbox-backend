@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
     totalStorage: {
         type: Number,
         required: true,
-        default: 50 * 1024 * 1024
+        default: 2 * 1024 * 1024 * 1024
     },
     usedStorage: {
         type: Number,
