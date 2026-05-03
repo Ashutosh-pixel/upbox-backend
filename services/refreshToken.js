@@ -18,7 +18,7 @@ const refresh = async (req, res) => {
 
         const accessToken = generateAccessToken({ _id: decode.userId });
 
-        return res.json({ accessToken, name: user.name, email: user.email });
+        return res.json({ accessToken, name: user.name, email: user.email, totalStorage: user.totalStorage, usedStorage: user.usedStorage });
     } catch (error) {
         console.log("error", error)
         return res.sendStatus(403);

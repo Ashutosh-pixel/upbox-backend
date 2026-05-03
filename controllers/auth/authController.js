@@ -38,7 +38,7 @@ const login = async (req, res) => {
             secure: true,
             sameSite: "Strict",
             maxAge: 7 * 24 * 60 * 60 * 1000,
-        }).json({ accessToken, name: user.name, email: user.email });
+        }).json({ accessToken, name: user.name, email: user.email, totalStorage: user.totalStorage, usedStorage: user.usedStorage });
 
 
     } catch (error) {
@@ -108,6 +108,9 @@ const signup = async (req, res) => {
                 user: {
                     _id: user._id,
                     email: user.email,
+                    name: user.name,
+                    totalStorage: user.totalStorage,
+                    usedStorage: user.usedStorage
                 },
             });
 

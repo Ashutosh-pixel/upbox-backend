@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { fileBroadcast } = require("../utils/sse/sseManager");
 
 // initial check and reserve storage
 const checkAndReserveStorage = async (userId, fileSize) => {
@@ -24,7 +25,7 @@ const checkAndReserveStorage = async (userId, fileSize) => {
 
 // after file upload completed
 const checkAndReleaseStorage = async (userId, fileSize) => {
-    const output = await User.updateOne(
+    const output = await User.findOneAndUpdate(
         {
             _id: userId,
             reservedStorage: { $gte: fileSize }
@@ -34,12 +35,19 @@ const checkAndReleaseStorage = async (userId, fileSize) => {
                 reservedStorage: -fileSize,
                 usedStorage: fileSize
             }
+        },
+        {
+            new: true,
+            lean: true
         }
     );
 
-    if (output.modifiedCount === 0) {
+    if (!output) {
         throw new Error("Invalid release operation");
     }
+
+    // broadcast disk storage to client
+    fileBroadcast("updateStorage", userId, output.usedStorage)
 }
 
 // after file upload failed/cancelled

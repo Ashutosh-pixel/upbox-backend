@@ -1,69 +1,90 @@
+const { default: mongoose } = require("mongoose");
 const File = require("../../models/Files");
 const Folder = require("../../models/Folder");
 
 const globalSearch = async (req, res) => {
   const { query } = req.query;
+  const { userId } = req.user;
+  const userID = new mongoose.Types.ObjectId(userId);
+
 
   try {
     const [filesResult, foldersResult] = await Promise.all([
-      await File.aggregate([
+      File.aggregate([
         {
           $search: {
             index: "file_index",
-            // text: {
-            //   query: query,
-            //   path: ["filename"],
-            // },
-            autocomplete: {
-              query: query,
-              path: "filename"
+            compound: {
+              must: [
+                {
+                  autocomplete: {
+                    query: query,
+                    path: "filename"
+                  }
+                }
+              ],
+              filter: [
+                {
+                  equals: {
+                    path: "userID",
+                    value: userID
+                  }
+                }
+              ]
             }
-          },
+          }
         },
         {
           $project: {
             _id: 1,
             filename: 1,
             parentID: 1,
-            type: "file",
-          },
+            type: "file"
+          }
         },
-        {
-          $limit: 5
-        }
+        { $limit: 5 }
       ]),
 
-      await Folder.aggregate([
+      Folder.aggregate([
         {
           $search: {
             index: "folder_index",
-            // text: {
-            //   query: query,
-            //   path: ["name"],
-            // },
-            autocomplete: {
-              query: query,
-              path: "name"
+            compound: {
+              must: [
+                {
+                  autocomplete: {
+                    query: query,
+                    path: "name"
+                  }
+                }
+              ],
+              filter: [
+                {
+                  equals: {
+                    path: "userID",
+                    value: userID
+                  }
+                }
+              ]
             }
-          },
+          }
         },
         {
           $project: {
             _id: 1,
             name: 1,
             parentID: 1,
-            type: "folder",
-          },
+            type: "folder"
+          }
         },
-        {
-          $limit: 5
-        }
-      ]),
+        { $limit: 5 }
+      ])
     ]);
 
-    const results = [...foldersResult, ...filesResult]
+    const results = [...foldersResult, ...filesResult];
 
     res.status(200).json({ success: true, data: results });
+
   } catch (error) {
     console.log("error", error);
     res.status(500).json({ success: false, message: "search failed" });

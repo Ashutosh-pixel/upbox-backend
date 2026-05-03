@@ -41,7 +41,7 @@ app.use('/folder', folderRoute);
 app.get('/', (req, res) => {
   res.status(200).json("Hello User")
 })
-app.get("/search", globalSearch);
+app.get("/search", apiAuth, globalSearch);
 
 app.get('/connection', apiAuth, async (req, res) => {
   res.setHeader('Content-Type', "text/event-stream");
