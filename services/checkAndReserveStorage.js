@@ -47,7 +47,7 @@ const checkAndReleaseStorage = async (userId, fileSize) => {
     }
 
     // broadcast disk storage to client
-    fileBroadcast("updateStorage", userId, output.usedStorage)
+    fileBroadcast("updateStorage", userId.toString(), output.usedStorage)
 }
 
 // after file upload failed/cancelled

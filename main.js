@@ -47,6 +47,7 @@ app.get('/connection', apiAuth, async (req, res) => {
   res.setHeader('Content-Type', "text/event-stream");
   res.setHeader('Cache-Control', "no-cache");
   res.setHeader('Connection', "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");  // for production only
   res.flushHeaders();
 
   const userID = req.user.userId;
