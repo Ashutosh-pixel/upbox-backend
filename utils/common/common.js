@@ -17,4 +17,8 @@ function getContentType(fileExtension) {
     return extensionMap[fileExtension.toLowerCase()];
 }
 
-module.exports = { getContentType, s3 };
+function generateOTP() {
+    return Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+}
+
+module.exports = { getContentType, s3, generateOTP };

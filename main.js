@@ -9,6 +9,8 @@ const globalSearch = require('./controllers/search/globalSearch');
 const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/AuthRoute');
 const apiAuth = require('./middleware/auth/authMiddleware');
+const redisClient = require('./utils/redis/redis');
+const OtpRoute = require('./routes/OtpRoute');
 
 require('dotenv').config();
 
@@ -26,8 +28,10 @@ app.use(cors(corsOptions));
 
 connectDB()
   .then(() => {
-    app.listen(process.env.PORT, () => {
+    app.listen(process.env.PORT, async () => {
       console.log('server started 😊')
+      await redisClient.connect()  // redis connection
+      console.log("Redis Connected 👍👍");
     })
   })
   .catch((error) => {
@@ -38,6 +42,7 @@ connectDB()
 app.use("/auth", authRouter);
 app.use('/user', fileRoute);
 app.use('/folder', folderRoute);
+app.use('/otp', OtpRoute);
 app.get('/', (req, res) => {
   res.status(200).json("Hello User")
 })
