@@ -6,7 +6,7 @@ const otpService = async (email) => {
 
     const otpkey = `otp:${email}`;
     const otpexpiry = Number(process.env.OTP_EXPIRY) || 300;
-    await redisClient.set(otpkey, JSON.stringify(newotp), { EX: otpexpiry });
+    await redisClient.set(otpkey, newotp, { EX: otpexpiry });
 
     const cooldownkey = `cooldown:${email}`;
     const cooldown = Number(process.env.COOLDOWN) || 60;

@@ -2,6 +2,7 @@ const User = require("../../models/User");
 const bcrypt = require("bcrypt");
 const { generateAccessToken, generateRefreshToken } = require("../../utils/token");
 const RefreshToken = require("../../models/RefreshToken");
+const redisClient = require("../../utils/redis/redis");
 
 const login = async (req, res) => {
     try {
@@ -72,18 +73,98 @@ const signup = async (req, res) => {
         const exists = await User.findOne({ email });
 
         if (exists) {
-            return res.status(400).json({ message: "User already exists" });
+            return res.status(400).json({ message: "User already exists", errorCode: "DUPLICATE_EMAIL" });
         }
 
         // hash passwrd
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // create user
-        const user = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-        });
+        // store temp details in redis
+        const detailKey = `user:${email}`
+        await redisClient.hSet(
+            detailKey,
+            {
+                name: name.trim(),
+                email: email.trim(),
+                password: hashedPassword
+            }
+        )
+
+        await redisClient.expire(detailKey, 600);
+
+        return res.status(200).json({ message: "All checks passed", successCode: "CHECK_PASSED" })
+
+    } catch (error) {
+        console.log("error", error);
+        res.status(500).json({ message: "Signup failed", errorCode: "CHECK_FAILED" });
+    }
+}
+
+const logout = async (req, res) => {
+    const token = req.cookies.RefreshToken;
+
+    await RefreshToken.deleteOne({ token });
+
+    res.clearCookie("refreshToken");
+    res.sendStatus(204);
+}
+
+const newAccount = async (req, res) => {
+    const { email, password, name } = req.body;
+
+    try {
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is missing" })
+        }
+
+        if (!password) {
+            return res.status(400).json({ message: "Password is missing" })
+        }
+
+
+        if (!name) {
+            return res.status(400).json({ message: "Name is missing" })
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password is too short" })
+        }
+
+        const exists = await User.findOne({ email });
+
+        if (exists) {
+            return res.status(400).json({ message: "User already exists", errorCode: "DUPLICATE_EMAIL" });
+        }
+
+
+        const key = `user:${email}`;
+
+        let cachedUser = await redisClient.hGetAll(key);
+
+        let user;
+
+        if (cachedUser && Object.keys(cachedUser).length > 0) {
+            // create user
+            user = await User.create({
+                name: cachedUser.name,
+                email: cachedUser.email,
+                password: cachedUser.password,
+            });
+
+            await redisClient.del(key);
+        }
+        else {
+            // hash passwrd
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // create user
+            user = await User.create({
+                name,
+                email,
+                password: hashedPassword,
+            });
+        }
 
         // generate tokens
         const accessToken = generateAccessToken(user);
@@ -116,17 +197,8 @@ const signup = async (req, res) => {
 
     } catch (error) {
         console.log("error", error);
-        res.status(500).json({ message: "Signup failed" });
+        res.status(500).json({ message: "Signup failed", errorCode: "CHECK_FAILED" });
     }
 }
 
-const logout = async (req, res) => {
-    const token = req.cookies.RefreshToken;
-
-    await RefreshToken.deleteOne({ token });
-
-    res.clearCookie("refreshToken");
-    res.sendStatus(204);
-}
-
-module.exports = { login, signup, logout };
+module.exports = { login, signup, logout, newAccount };
