@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 const corsOptions = {
   origin: ['http://localhost:3000', 'https://upbox-client-git-vercel-react-fdb0e5-bitgeeks-projects-2162575c.vercel.app', 'https://upboxdrive.online', 'https://www.upboxdrive.online'],
-  methods: ['GET', 'POST', 'PUT', 'PATCH'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true,
 };
 

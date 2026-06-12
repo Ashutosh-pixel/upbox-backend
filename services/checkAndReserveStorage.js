@@ -69,4 +69,27 @@ const failedAndReleaseStorage = async (userId, fileSize) => {
     }
 }
 
-module.exports = { checkAndReserveStorage, checkAndReleaseStorage, failedAndReleaseStorage }
+// after file deletion
+const deleteAndReleaseStorage = async (userId, fileSize) => {
+    const output = await User.findByIdAndUpdate(
+        userId,
+        {
+            $inc: {
+                usedStorage: -fileSize
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    if (!output) {
+        throw new Error("Invalid delete release operation");
+    }
+
+    // broadcast disk storage to client
+    fileBroadcast("updateStorage", userId.toString(), output.usedStorage)
+
+}
+
+module.exports = { checkAndReserveStorage, checkAndReleaseStorage, failedAndReleaseStorage, deleteAndReleaseStorage }

@@ -10,7 +10,7 @@ const readFilesController = async (req, res) => {
     const limit = Number(req.query.limit);
     const fileType = req.query.type;
 
-    const query = { userID: userId, parentID, status: "Completed" }
+    const query = { userID: userId, parentID, status: "Completed", isDeleted: false }
 
 
     // Apply type filter

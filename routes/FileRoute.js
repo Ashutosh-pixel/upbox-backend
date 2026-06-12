@@ -22,6 +22,7 @@ const systemCancelFileUploadController = require('../controllers/file/systemCanc
 const checkFileDuplicateController = require('../controllers/file/checkFileDuplicateController');
 const fileRenameController = require('../controllers/Rename/fileRenameController');
 const apiAuth = require('../middleware/auth/authMiddleware');
+const deleteFileController = require('../controllers/file/deleteFileController');
 
 fileRoute.post('/uploadfile', upload.single('file'), apiAuth, folderHierarchy, uploadFileController, fileUploadInitiateController);
 fileRoute.post('/pastefile', apiAuth, pasteFileController);
@@ -41,5 +42,6 @@ fileRoute.post('/file/rename', apiAuth, renameFileController);
 fileRoute.put('/file/:fileID', apiAuth, systemCancelMultipartUploadController, systemCancelFileUploadController);
 fileRoute.post('/file/checkduplicatefiles', apiAuth, checkFileDuplicateController);
 fileRoute.patch('/file/fileRename', apiAuth, fileRenameController);
+fileRoute.delete('/file/:fileID', apiAuth, deleteFileController);
 
 module.exports = fileRoute;
